@@ -28,21 +28,21 @@ func Login(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBind(&lq); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
-		return
+		c.Abort()
 	}
 
 	if err := db.Where("phone = ?", lq.Phone).First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
-		return
+		c.Abort()
 	}
 
 	if !handle.CheckPasswordHash(lq.Password, user.Password) {
 		handle.ReturnError(http.StatusBadRequest, "密码错误", c)
-		return
+		c.Abort()
 	}
 	claims := &handle.JWTClaims{
 		UserID:      user.ID,
-		Username:    lq.Phone,
+		Phone:       lq.Phone,
 		FullName:    user.RealName,
 		Permissions: []string{},
 	}
@@ -50,11 +50,22 @@ func Login(c *gin.Context) {
 	claims.ExpiresAt = time.Now().Add(time.Second * time.Duration(ExpireTime)).Unix()
 	signedToken, err := handle.GetToken(claims)
 	if err != nil {
-		c.String(http.StatusNotFound, err.Error())
-		return
+		handle.ReturnError(http.StatusNotFound, err.Error(), c)
+		c.Abort()
 	}
-	// c.String(http.StatusOK, signedToken)
 	handle.ReturnSuccess("ok", signedToken, c)
 }
 
-
+// GetUserInfo 获取自己详细信息
+func GetUserInfo(c *gin.Context) {
+	_token, _ := c.Get("token")
+	token, ok := _token.(*handle.JWTClaims)
+	if !ok {
+		handle.ReturnError(http.StatusUnauthorized, "请求头中auth有误", c)
+		c.Abort()
+	}
+	var user model.User
+	db := config.GetMysql()
+	db.Where("phone = ?", token.Phone).First(&user)
+	handle.ReturnSuccess("ok", user, c)
+}
