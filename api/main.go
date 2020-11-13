@@ -1,12 +1,17 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/xiao0811/xiniu/config"
+	"github.com/xiao0811/xiniu/handle"
+	"github.com/xiao0811/xiniu/model"
 )
 
 func main() {
-	conf := config.Conf
-	fmt.Println(conf)
+	password, _ := handle.HashPassword("xiaosha")
+	var xiao = model.User{
+		Phone:    "18949883585",
+		Password: password,
+	}
+	db := config.GetMysql()
+	db.Create(&xiao)
 }
