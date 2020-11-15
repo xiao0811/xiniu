@@ -15,5 +15,6 @@ func GetRouter() *gin.Engine {
 	token := app.Group("/v1/")
 	token.Use(middleware.VerifyToken())
 	token.POST("/get_user_info", controller.GetUserInfo)
+	token.POST("/create_user", controller.CreateUser)
 	return app
 }

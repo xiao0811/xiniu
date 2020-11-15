@@ -28,17 +28,17 @@ func Login(c *gin.Context) {
 	var user model.User
 	if err := c.ShouldBind(&lq); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
-		c.Abort()
+		return
 	}
 
 	if err := db.Where("phone = ?", lq.Phone).First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
-		c.Abort()
+		return
 	}
 
 	if !handle.CheckPasswordHash(lq.Password, user.Password) {
 		handle.ReturnError(http.StatusBadRequest, "密码错误", c)
-		c.Abort()
+		return
 	}
 	claims := &handle.JWTClaims{
 		UserID:      user.ID,
@@ -51,7 +51,7 @@ func Login(c *gin.Context) {
 	signedToken, err := handle.GetToken(claims)
 	if err != nil {
 		handle.ReturnError(http.StatusNotFound, err.Error(), c)
-		c.Abort()
+		return
 	}
 	handle.ReturnSuccess("ok", signedToken, c)
 }
@@ -62,7 +62,7 @@ func GetUserInfo(c *gin.Context) {
 	token, ok := _token.(*handle.JWTClaims)
 	if !ok {
 		handle.ReturnError(http.StatusUnauthorized, "请求头中auth有误", c)
-		c.Abort()
+		return
 	}
 	var user model.User
 	db := config.GetMysql()
