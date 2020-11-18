@@ -42,6 +42,12 @@ func CreateUser(c *gin.Context) {
 		r.Password, _ = handle.HashPassword("123456")
 	}
 	ps, _ := handle.HashPassword(r.Password)
+	var m uint
+	if r.MarshallingID == 0 {
+		m = 1
+	} else {
+		m = r.MarshallingID
+	}
 	user = model.User{
 		Phone:          r.Phone,
 		Password:       ps,
@@ -50,7 +56,7 @@ func CreateUser(c *gin.Context) {
 		Birthday:       r.Birthday,
 		Identification: r.Identification,
 		Role:           r.Role,
-		MarshallingID:  r.MarshallingID,
+		MarshallingID:  m,
 	}
 
 	if err := db.Create(&user).Error; err != nil {
