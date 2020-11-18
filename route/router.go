@@ -9,8 +9,12 @@ import (
 // GetRouter 获取路由
 func GetRouter() *gin.Engine {
 	app := gin.Default()
-
+	// 用户登录
 	app.POST("/login", controller.Login)
+	// 发送修改密码短信
+	app.POST("/send_change_password_message", controller.SendChangePasswordMessage)
+	// 修改密码
+	app.POST("/change_password", controller.ChangePassword)
 
 	token := app.Group("/v1/")
 	token.Use(middleware.VerifyToken())
@@ -29,6 +33,5 @@ func GetRouter() *gin.Engine {
 		marshalling.POST("/update", controller.UpdateMarshalling)
 		marshalling.POST("/delete", controller.DeleteMarshalling)
 	}
-
 	return app
 }
