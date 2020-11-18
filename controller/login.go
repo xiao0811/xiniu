@@ -66,6 +66,6 @@ func GetUserInfo(c *gin.Context) {
 	}
 	var user model.User
 	db := config.GetMysql()
-	db.Where("phone = ?", token.Phone).First(&user)
+	db.Preload("Marshalling").Where("phone = ?", token.Phone).First(&user)
 	handle.ReturnSuccess("ok", user, c)
 }

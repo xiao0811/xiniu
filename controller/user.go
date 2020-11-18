@@ -9,6 +9,7 @@ import (
 	"github.com/xiao0811/xiniu/model"
 )
 
+// CreateUserRequest .
 type CreateUserRequest struct {
 	Phone          string       `json:"phone" binding:"required"`
 	Password       string       `json:"password"`
@@ -17,7 +18,7 @@ type CreateUserRequest struct {
 	Birthday       model.MyTime `json:"birthday"`
 	Identification string       `json:"identification"`
 	Role           uint8        `json:"role"`
-	Marshalling    uint8        `json:"marshalling"`
+	Marshalling    uint         `json:"marshalling"`
 }
 
 // CreateUser 创建新的管理员
@@ -45,7 +46,7 @@ func CreateUser(c *gin.Context) {
 		Birthday:       cr.Birthday,
 		Identification: cr.Identification,
 		Role:           cr.Role,
-		Marshalling:    cr.Marshalling,
+		MarshallingID:  cr.Marshalling,
 	}
 
 	if err := db.Create(&user).Error; err != nil {
