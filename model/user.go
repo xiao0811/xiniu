@@ -2,7 +2,7 @@ package model
 
 // User 用户模型
 type User struct {
-	ID             uint        `gorm:"primarykey" json:"id"`
+	ID             uint        `gorm:"primarykey" json:"id" binding:"required"`
 	Phone          string      `gorm:"unique;type:char(11)" json:"phone"`
 	Password       string      `gorm:"type:varchar(100)" json:"-"`
 	RealName       string      `gorm:"type:varchar(10)" json:"real_name"`
@@ -11,7 +11,7 @@ type User struct {
 	Identification string      `gorm:"type:char(18)" json:"identification"`
 	Role           uint8       `json:"role"`
 	MarshallingID  uint        `json:"marshalling_id"`
-	Marshalling    Marshalling `json:"marshalling"`
+	Marshalling    Marshalling `json:"marshalling,omitempty"`
 	CreatedAt      MyTime      `json:"created_at"`
 	UpdatedAt      MyTime      `json:"updated_at"`
 }
