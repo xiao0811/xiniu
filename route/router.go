@@ -2,13 +2,20 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/controller"
 	"github.com/xiao0811/xiniu/middleware"
 )
 
 // GetRouter 获取路由
 func GetRouter() *gin.Engine {
+	// Debug
+	if !config.Conf.AppConfig.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	app := gin.Default()
+
 	// 用户登录
 	app.POST("/login", controller.Login)
 	// 发送修改密码短信

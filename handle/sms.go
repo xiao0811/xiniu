@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/xiao0811/xiniu/config"
 )
 
 // Info ...
@@ -12,11 +14,12 @@ type Info struct {
 	Destmobile string `json:"destmobile"` // 手机号码
 }
 
-const (
-	messageServerURL = "http://www.jianzhou.sh.cn/JianzhouSMSWSServer/http/sendBatchMessage"
-	account          = "sdk_aqjr"
-	password         = "njmz504Aq808"
-	signature        = "【国运产权】"
+var (
+	conf             = config.Conf.MessageConfig
+	messageServerURL = conf.ServerURL
+	account          = conf.Account
+	password         = conf.Password
+	signature        = conf.Signature
 )
 
 // Send 发生短信

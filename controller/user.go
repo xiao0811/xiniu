@@ -66,14 +66,11 @@ func CreateUser(c *gin.Context) {
 	handle.ReturnSuccess("ok", user, c)
 }
 
-// GetUserDetailsRequest 获取用户详情结构体
-type GetUserDetailsRequest struct {
-	ID uint `json:"id" binding:"required"`
-}
-
 // GetUserDetails 获取用户详情
 func GetUserDetails(c *gin.Context) {
-	var r GetUserDetailsRequest
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return

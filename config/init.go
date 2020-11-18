@@ -11,7 +11,18 @@ import (
 
 // YamlConfig 全部配置信息
 type YamlConfig struct {
-	MysqlConfig `yaml:"mysql"`
+	AppConfig     `yaml:"app"`
+	MysqlConfig   `yaml:"mysql"`
+	JWTConfig     `yaml:"jwt"`
+	RedisConfig   `yaml:"redis"`
+	MessageConfig `yaml:"message"`
+}
+
+// AppConfig 系统配置信息
+type AppConfig struct {
+	Name  string `yaml:"name"`
+	Debug bool   `yaml:"debug"`
+	Port  string `yaml:"port"`
 }
 
 // MysqlConfig 数据库配置信息
@@ -21,6 +32,28 @@ type MysqlConfig struct {
 	Database string `yaml:"database"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+}
+
+// JWTConfig Jwt配置信息
+type JWTConfig struct {
+	ExpireTime int    `yaml:"expire_time"`
+	Salt       string `yaml:"salt"`
+}
+
+// RedisConfig Redis配置信息
+type RedisConfig struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Database int    `yaml:"database"`
+	Password string `yaml:"password"`
+}
+
+// MessageConfig 短信配置信息
+type MessageConfig struct {
+	ServerURL string `yaml:"server_url"`
+	Account   string `yaml:"account"`
+	Password  string `yaml:"password"`
+	Signature string `yaml:"signature"`
 }
 
 var (

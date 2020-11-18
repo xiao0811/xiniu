@@ -8,6 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/xiao0811/xiniu/config"
 )
 
 const (
@@ -39,9 +40,9 @@ type JWTClaims struct {
 
 var (
 	// Secret 加盐
-	Secret = "dong_tech"
+	Secret = config.Conf.JWTConfig.Salt
 	// ExpireTime token有效期
-	ExpireTime = 3600
+	ExpireTime = config.Conf.JWTConfig.ExpireTime
 )
 
 func login(c *gin.Context) {
