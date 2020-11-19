@@ -15,13 +15,16 @@ type GroupListRequest struct {
 
 // GroupList 标签类型列表
 func GroupList(c *gin.Context) {
-
+	db := config.GetMysql()
+	var groups []model.LabelGroup
+	db.Where("status = 1").Find(&groups)
+	handle.ReturnSuccess("ok", groups, c)
 }
 
 // CreateGroup 创建标签类型
 func CreateGroup(c *gin.Context) {
 	var r struct {
-		Name  string `json:"name"`
+		Name  string `json:"name" binding:"required"`
 		Color string `json:"color"`
 	}
 	if err := c.ShouldBind(&r); err != nil {

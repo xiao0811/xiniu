@@ -14,14 +14,14 @@ import (
 
 // CreateUserRequest .
 type CreateUserRequest struct {
-	Phone          string       `json:"phone" binding:"required"`
-	Password       string       `json:"password"`
-	RealName       string       `json:"real_name"`
-	Gender         uint8        `json:"gender"`
-	Birthday       model.MyTime `json:"birthday"`
-	Identification string       `json:"identification"`
-	Role           uint8        `json:"role"`
-	MarshallingID  uint         `json:"marshalling_id"`
+	Phone          string `json:"phone" binding:"required"`
+	Password       string `json:"password"`
+	RealName       string `json:"real_name"`
+	Gender         uint8  `json:"gender"`
+	Birthday       string `json:"birthday"`
+	Identification string `json:"identification"`
+	Role           uint8  `json:"role"`
+	MarshallingID  uint   `json:"marshalling_id"`
 }
 
 // CreateUser 创建新的管理员
@@ -48,12 +48,13 @@ func CreateUser(c *gin.Context) {
 	} else {
 		m = r.MarshallingID
 	}
+	dt, _ := time.ParseInLocation(model.TimeFormat, r.Birthday, time.Local)
 	user = model.User{
 		Phone:          r.Phone,
 		Password:       ps,
 		RealName:       r.RealName,
 		Gender:         r.Gender,
-		Birthday:       r.Birthday,
+		Birthday:       model.MyTime{dt},
 		Identification: r.Identification,
 		Role:           r.Role,
 		MarshallingID:  m,

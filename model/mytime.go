@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-var timeFormat = "2006-01-02 15:04:05"
+// TimeFormat 时间格式
+var TimeFormat = "2006-01-02 15:04:05"
 
 // MyTime 数据库时间格式
 type MyTime struct {
@@ -15,7 +16,7 @@ type MyTime struct {
 
 // MarshalJSON 格式化成json
 func (t MyTime) MarshalJSON() ([]byte, error) {
-	formatted := fmt.Sprintf("\"%s\"", t.Format(timeFormat))
+	formatted := fmt.Sprintf("\"%s\"", t.Format(TimeFormat))
 	return []byte(formatted), nil
 }
 
