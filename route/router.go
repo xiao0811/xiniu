@@ -33,6 +33,7 @@ func GetRouter() *gin.Engine {
 		user.POST("/create", controller.CreateUser)
 		user.POST("/get_details", controller.GetUserDetails)
 		user.POST("/update", controller.UpdateUser)
+		user.POST("/user_list", controller.UserList)
 	}
 
 	marshalling := token.Group("marshalling")

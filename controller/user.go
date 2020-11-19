@@ -178,3 +178,11 @@ func ChangePassword(c *gin.Context) {
 	}
 	handle.ReturnSuccess("ok", "密码修改成功", c)
 }
+
+// UserList 用户列表
+func UserList(c *gin.Context) {
+	db := config.GetMysql()
+	var users []model.User
+	db.Find(&users)
+	handle.ReturnSuccess("ok", users, c)
+}
