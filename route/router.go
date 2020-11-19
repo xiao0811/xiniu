@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/controller"
+	"github.com/xiao0811/xiniu/controller/label"
 	"github.com/xiao0811/xiniu/middleware"
 )
 
@@ -40,5 +41,23 @@ func GetRouter() *gin.Engine {
 		marshalling.POST("/update", controller.UpdateMarshalling)
 		marshalling.POST("/delete", controller.DeleteMarshalling)
 	}
+
+	l := token.Group("/label")
+	{
+		l.POST("/create", label.Create)
+		l.POST("/update", label.Update)
+		l.POST("/delete", label.Delete)
+		l.POST("/index", label.Index)
+		l.POST("/info", label.Info)
+	}
+	lg := token.Group("/label_group")
+	{
+		lg.POST("/create", label.CreateGroup)
+		lg.POST("/update", label.UpdateGroup)
+		lg.POST("/delete", label.DeleteGroup)
+		lg.POST("/index", label.GroupList)
+		lg.POST("/info", label.GroupDetails)
+	}
+
 	return app
 }
