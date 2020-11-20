@@ -34,6 +34,7 @@ func GetRouter() *gin.Engine {
 		user.POST("/get_details", controller.GetUserDetails)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/user_list", controller.UserList)
+		user.POST("/delete", controller.DeleteUser)
 	}
 
 	marshalling := token.Group("marshalling")

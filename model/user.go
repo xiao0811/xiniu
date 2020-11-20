@@ -12,6 +12,8 @@ type User struct {
 	Role           uint8       `json:"role"`
 	MarshallingID  uint        `json:"marshalling_id"`
 	Marshalling    Marshalling `json:"marshalling,omitempty"`
+	Status         int8        `json:"status"`
+	Duty           int8        `json:"duty"`
 	CreatedAt      MyTime      `json:"created_at"`
 	UpdatedAt      MyTime      `json:"updated_at"`
 }

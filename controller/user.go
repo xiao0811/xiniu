@@ -21,6 +21,7 @@ type CreateUserRequest struct {
 	Birthday       string `json:"birthday"`
 	Identification string `json:"identification"`
 	Role           uint8  `json:"role"`
+	Duty           int8   `json:"duty"`
 	MarshallingID  uint   `json:"marshalling_id"`
 }
 
@@ -58,6 +59,7 @@ func CreateUser(c *gin.Context) {
 		Identification: r.Identification,
 		Role:           r.Role,
 		MarshallingID:  m,
+		Status:         1,
 	}
 
 	if err := db.Create(&user).Error; err != nil {
@@ -181,8 +183,55 @@ func ChangePassword(c *gin.Context) {
 
 // UserList 用户列表
 func UserList(c *gin.Context) {
+	var r struct {
+		RealName      string `json:"real_name"`
+		Status        int8   `json:"status"`
+		MarshallingID uint   `json:"marshalling_id"`
+		Role          uint8  `json:"role"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
 	db := config.GetMysql()
 	var users []model.User
-	db.Find(&users)
+	sql := db.Preload("Marshalling").Where("status = 1")
+	if r.RealName != "" {
+		sql = sql.Where("real_name like '%" + r.RealName + "%'")
+	}
+	if r.Status != 0 {
+		sql = sql.Where("status = ?", r.Status)
+	}
+	if r.MarshallingID != 0 {
+		sql = sql.Where("marshalling_id = ?", r.MarshallingID)
+	}
+	if r.Role != 0 {
+		sql = sql.Where("role = ?", r.Role)
+	}
+	sql.Find(&users)
 	handle.ReturnSuccess("ok", users, c)
+}
+
+// DeleteUser 删除用户
+func DeleteUser(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id"  binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var user model.User
+	if err := db.Where("id = ?", r.ID).First(&user).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
+		return
+	}
+	user.Status = 0
+	if err := db.Save(&user).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
+		return
+	}
+
+	handle.ReturnSuccess("ok", user, c)
 }

@@ -53,7 +53,10 @@ func Login(c *gin.Context) {
 		handle.ReturnError(http.StatusNotFound, err.Error(), c)
 		return
 	}
-	handle.ReturnSuccess("ok", signedToken, c)
+	handle.ReturnSuccess("ok", gin.H{
+		"token": signedToken,
+		"user":  user,
+	}, c)
 }
 
 // GetUserInfo 获取自己详细信息
