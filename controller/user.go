@@ -188,6 +188,8 @@ func UserList(c *gin.Context) {
 		Status        int8   `json:"status"`
 		MarshallingID uint   `json:"marshalling_id"`
 		Role          uint8  `json:"role"`
+		Limit         int    `json:"limit"`
+		Offset        int    `json:"offset"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -208,7 +210,12 @@ func UserList(c *gin.Context) {
 	if r.Role != 0 {
 		sql = sql.Where("role = ?", r.Role)
 	}
-	sql.Find(&users)
+	if r.Limit != 0 {
+		sql = sql.Limit(r.Limit)
+	} else {
+		sql = sql.Limit(10)
+	}
+	sql.Offset(r.Offset).Find(&users)
 	handle.ReturnSuccess("ok", users, c)
 }
 

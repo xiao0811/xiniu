@@ -88,3 +88,22 @@ func DeleteMarshalling(c *gin.Context) {
 
 	handle.ReturnSuccess("ok", m, c)
 }
+
+// MarshallingList 分组列表
+func MarshallingList(c *gin.Context) {
+	var r struct {
+		Type uint8 `json:"type"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据不正确", c)
+		return
+	}
+	var marshallings []model.Marshalling
+	db := config.GetMysql()
+	sql := db.Where("status = 1")
+	if r.Type != 0 {
+		sql = sql.Where("type = ?", r.Type)
+	}
+	sql.Find(&marshallings)
+	handle.ReturnSuccess("ok", marshallings, c)
+}
