@@ -42,6 +42,7 @@ func GetRouter() *gin.Engine {
 		marshalling.POST("/create", controller.CreateMarshalling)
 		marshalling.POST("/update", controller.UpdateMarshalling)
 		marshalling.POST("/delete", controller.DeleteMarshalling)
+		marshalling.POST("/marshalling_list", controller.MarshallingList)
 	}
 
 	l := token.Group("/label")
