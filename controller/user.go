@@ -190,6 +190,7 @@ func UserList(c *gin.Context) {
 		Role          uint8  `json:"role"`
 		Limit         int    `json:"limit"`
 		Offset        int    `json:"offset"`
+		Duty          int8   `json:"duty"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -210,6 +211,9 @@ func UserList(c *gin.Context) {
 	}
 	if r.Role != 0 {
 		sql = sql.Where("role = ?", r.Role)
+	}
+	if r.Duty != 0 {
+		sql = sql.Where("duty = ?", r.Duty)
 	}
 	if r.Limit != 0 {
 		sql = sql.Limit(r.Limit)
