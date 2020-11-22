@@ -9,10 +9,6 @@ import (
 	"github.com/xiao0811/xiniu/model"
 )
 
-// GroupListRequest 标签分组列表
-type GroupListRequest struct {
-}
-
 // GroupList 标签类型列表
 func GroupList(c *gin.Context) {
 	var r struct {
@@ -38,6 +34,7 @@ func CreateGroup(c *gin.Context) {
 	var r struct {
 		Name  string `json:"name" binding:"required"`
 		Color string `json:"color"`
+		Type  int8   `json:"type"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -49,6 +46,7 @@ func CreateGroup(c *gin.Context) {
 		Name:   r.Name,
 		Status: 1,
 		Color:  r.Color,
+		Type:   r.Type,
 	}
 	if err := db.Create(&group).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "创建失败", c)

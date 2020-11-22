@@ -234,7 +234,7 @@ func UserList(c *gin.Context) {
 // DeleteUser 删除用户
 func DeleteUser(c *gin.Context) {
 	var r struct {
-		ID uint `json:"id"  binding:"required"`
+		ID uint `json:"id" binding:"required"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -253,4 +253,26 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	handle.ReturnSuccess("ok", user, c)
+}
+
+// UserBatchGroup 用户批量分组
+func UserBatchGroup(c *gin.Context) {
+	var r struct {
+		GroupID uint  `json:"groupId" binding:"required"`
+		UserIds []int `json:"userids"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var group model.Marshalling
+	if err := db.Where("id = ?", r.GroupID).First(&group).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "组别不存在", c)
+		return
+	}
+	db.Model(model.User{}).Where("id IN ?", r.UserIds).Updates(model.User{
+		MarshallingID: r.GroupID,
+	})
+	handle.ReturnSuccess("ok", "批量修改成功", c)
 }
