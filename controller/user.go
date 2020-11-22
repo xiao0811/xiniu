@@ -197,6 +197,7 @@ func UserList(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var users []model.User
+	var count int64
 	sql := db.Preload("Marshalling").Where("status = 1")
 	if r.RealName != "" {
 		sql = sql.Where("real_name like '%" + r.RealName + "%'")
@@ -215,8 +216,15 @@ func UserList(c *gin.Context) {
 	} else {
 		sql = sql.Limit(10)
 	}
-	sql.Offset(r.Offset).Find(&users)
-	handle.ReturnSuccess("ok", users, c)
+	sql.Offset(r.Offset).Find(&users).Count(&count)
+	var pages int
+	if int(count)%r.Limit != 0 {
+		pages = int(count)/r.Limit + 1
+	} else {
+		pages = int(count) / r.Limit
+	}
+	currPage := r.Offset/r.Limit + 1
+	handle.ReturnSuccess("ok", gin.H{"user": users, "pages": pages, "currPage": currPage}, c)
 }
 
 // DeleteUser 删除用户
