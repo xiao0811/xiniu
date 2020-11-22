@@ -15,9 +15,21 @@ type GroupListRequest struct {
 
 // GroupList 标签类型列表
 func GroupList(c *gin.Context) {
+	var r struct {
+		Type int8 `json:"type"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+
 	db := config.GetMysql()
 	var groups []model.LabelGroup
-	db.Where("status = 1").Find(&groups)
+	sql := db.Where("status = 1").Preload("Labels")
+	if r.Type != 0 {
+		sql = sql.Where("type = ?", r.Type)
+	}
+	sql.Find(&groups)
 	handle.ReturnSuccess("ok", groups, c)
 }
 
