@@ -68,6 +68,7 @@ func GetRouter() *gin.Engine {
 		member.POST("/update", controller.UpdateMember)
 		member.POST("/review", controller.MemberReview)
 		member.POST("/member_list", controller.MemberList)
+		member.POST("/get_member_details", controller.GetMemberDetails)
 	}
 	return app
 }

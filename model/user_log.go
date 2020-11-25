@@ -1,5 +1,6 @@
 package model
 
+// UserLog 用户操作日志
 type UserLog struct {
 	ID        uint   `gorm:"primarykey" json:"id" binding:"required"`
 	Operator  uint   `json:"operator"`

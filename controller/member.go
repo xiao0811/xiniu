@@ -14,26 +14,26 @@ import (
 // CreateMember 创建一个新的客户
 func CreateMember(c *gin.Context) {
 	var r struct {
-		Name              string `json:"name"  binding:"required"` // 门店名称
-		City              string `json:"city"`                     // 所在城市
-		FirstCategory     string `json:"first_category"`           // 一级类目
-		SecondaryCategory string `json:"secondary_category"`       // 二级类目
-		BusinessScope     string `json:"business_scope"`           // 主营范围
-		Stores            uint8  `json:"stores"`                   // 门店数量
-		Accounts          uint8  `json:"accounts"`                 // 账户数量
-		Bosses            uint8  `json:"bosses"`                   // 老板人数
-		Brands            uint8  `json:"brands"`                   // 品牌数量
-		OperationsGroup   int    `json:"operations_group"`         // 运营组
-		OperationsStaff   int    `json:"operations_staff"`         // 运营人员
-		BusinessGroup     int    `json:"business_group"`           // 业务组
-		BusinessPeople    int    `json:"business_people"`          // 业务人员
-		ReviewAccount     string `json:"review_account"`           // 点评账号
-		CommentPassword   string `json:"comment_password"`         // 点评密码
-		Email             string `json:"email"`                    // 客户邮箱
-		Phone             string `json:"phone"`                    // 客户手机号码
-		OtherTags         string `json:"other_tags"`               // 其他标签
-		Auditors          uint   `json:"auditors"`                 // 审核人员
-		Type              int8   `json:"type"`                     // 备注信息
+		Name              string `json:"name" binding:"required"` // 门店名称
+		City              string `json:"city"`                    // 所在城市
+		FirstCategory     string `json:"first_category"`          // 一级类目
+		SecondaryCategory string `json:"secondary_category"`      // 二级类目
+		BusinessScope     string `json:"business_scope"`          // 主营范围
+		Stores            uint8  `json:"stores"`                  // 门店数量
+		Accounts          uint8  `json:"accounts"`                // 账户数量
+		Bosses            uint8  `json:"bosses"`                  // 老板人数
+		Brands            uint8  `json:"brands"`                  // 品牌数量
+		OperationsGroup   int    `json:"operations_group"`        // 运营组
+		OperationsStaff   int    `json:"operations_staff"`        // 运营人员
+		BusinessGroup     int    `json:"business_group"`          // 业务组
+		BusinessPeople    int    `json:"business_people"`         // 业务人员
+		ReviewAccount     string `json:"review_account"`          // 点评账号
+		CommentPassword   string `json:"comment_password"`        // 点评密码
+		Email             string `json:"email"`                   // 客户邮箱
+		Phone             string `json:"phone"`                   // 客户手机号码
+		OtherTags         string `json:"other_tags"`              // 其他标签
+		Auditors          uint   `json:"auditors"`                // 审核人员
+		Type              int8   `json:"type"`                    // 备注信息
 		Status            int8   `json:"status"`
 		Remarks           string `json:"remarks"`
 	}
@@ -92,7 +92,7 @@ func CreateMember(c *gin.Context) {
 func UpdateMember(c *gin.Context) {
 	var r model.Member
 	if err := c.ShouldBind(&r); err != nil {
-		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确"+err.Error(), c)
 		return
 	}
 	db := config.GetMysql()
@@ -200,4 +200,31 @@ func MemberReview(c *gin.Context) {
 	}
 	db.Create(&l)
 	handle.ReturnSuccess("ok", m, c)
+}
+
+// GetMemberDetails 获取客户详情
+func GetMemberDetails(c *gin.Context) {
+	var r struct {
+		ID int `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	var member model.Member
+	db := config.GetMysql()
+	sql := db.Where("id = ?", r.ID)
+	if err := sql.First(&member).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
+		return
+	}
+	var operation model.User
+	var business model.User
+	db.Where("id = ?", member.OperationsStaff).First(&operation)
+	db.Where("id = ?", member.BusinessPeople).First(&business)
+	handle.ReturnSuccess("ok", gin.H{
+		"member":    member,
+		"business":  business,
+		"operation": operation,
+	}, c)
 }
