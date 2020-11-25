@@ -55,7 +55,7 @@ func CreateUser(c *gin.Context) {
 		Password:       ps,
 		RealName:       r.RealName,
 		Gender:         r.Gender,
-		Birthday:       model.MyTime{dt},
+		Birthday:       model.MyTime{Time: dt},
 		Identification: r.Identification,
 		Role:           r.Role,
 		MarshallingID:  m,

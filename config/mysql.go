@@ -11,7 +11,13 @@ import (
 func init() {
 	db := GetMysql()
 	// 自动迁移
-	db.AutoMigrate(&model.User{}, &model.LabelGroup{}, &model.Label{})
+	db.AutoMigrate(
+		&model.User{},
+		&model.LabelGroup{},
+		&model.Label{},
+		&model.Member{},
+		&model.UserLog{},
+	)
 }
 
 // GetMysql 获取MySQL链接

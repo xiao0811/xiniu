@@ -62,6 +62,12 @@ func GetRouter() *gin.Engine {
 		lg.POST("/index", label.GroupList)
 		lg.POST("/info", label.GroupDetails)
 	}
-
+	member := token.Group("/member")
+	{
+		member.POST("/create", controller.CreateMember)
+		member.POST("/update", controller.UpdateMember)
+		member.POST("/review", controller.MemberReview)
+		member.POST("/member_list", controller.MemberList)
+	}
 	return app
 }

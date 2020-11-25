@@ -1,1 +1,186 @@
 package controller
+
+import (
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/xiao0811/xiniu/config"
+	"github.com/xiao0811/xiniu/handle"
+	"github.com/xiao0811/xiniu/model"
+)
+
+// CreateMember 创建一个新的客户
+func CreateMember(c *gin.Context) {
+	var r struct {
+		Name              string `json:"name"  binding:"required"` // 门店名称
+		City              string `json:"city"`                     // 所在城市
+		FirstCategory     string `json:"first_category"`           // 一级类目
+		SecondaryCategory string `json:"secondary_category"`       // 二级类目
+		BusinessScope     string `json:"business_scope"`           // 主营范围
+		Stores            uint8  `json:"stores"`                   // 门店数量
+		Accounts          uint8  `json:"accounts"`                 // 账户数量
+		Bosses            uint8  `json:"bosses"`                   // 老板人数
+		Brands            uint8  `json:"brands"`                   // 品牌数量
+		OperationsGroup   int    `json:"operations_group"`         // 运营组
+		OperationsStaff   int    `json:"operations_staff"`         // 运营人员
+		BusinessGroup     int    `json:"business_group"`           // 业务组
+		BusinessPeople    int    `json:"business_people"`          // 业务人员
+		ReviewAccount     string `json:"review_account"`           // 点评账号
+		CommentPassword   string `json:"comment_password"`         // 点评密码
+		Email             string `json:"email"`                    // 客户邮箱
+		Phone             string `json:"phone"`                    // 客户手机号码
+		OtherTags         string `json:"other_tags"`               // 其他标签
+		Auditors          uint   `json:"auditors"`                 // 审核人员
+		Type              int8   `json:"type"`                     // 备注信息
+		Status            int8   `json:"status"`
+		Remarks           string `json:"remarks"`
+	}
+	var m model.Member
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	if err := db.Where("name = ?", r.Name).First(&m).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "门店已存在", c)
+		return
+	}
+	m.UUID = "XINIU-CUS-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999))
+	m.Name = r.Name
+	m.City = r.City
+	m.FirstCategory = r.FirstCategory
+	m.SecondaryCategory = r.SecondaryCategory
+	m.BusinessScope = r.BusinessScope
+	m.Stores = r.Stores
+	m.Accounts = r.Accounts
+	m.Bosses = r.Bosses
+	m.Brands = r.Brands
+	m.OperationsGroup = r.OperationsGroup
+	m.OperationsStaff = r.OperationsStaff
+	m.BusinessGroup = r.BusinessGroup
+	m.BusinessPeople = r.BusinessPeople
+	m.ReviewAccount = r.ReviewAccount
+	m.CommentPassword = r.CommentPassword
+	m.Email = r.Email
+	m.Phone = r.Phone
+	m.OtherTags = r.OtherTags
+	m.Auditors = r.Auditors
+	m.Type = r.Type
+	m.Status = 0
+	m.Remarks = r.Remarks
+	if err := db.Create(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+		return
+	}
+	// 创建用户记录
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	l := model.UserLog{
+		Operator: token.UserID,
+		Action:   "Create Member",
+		Member:   m.ID,
+		Contract: 0,
+		Remarks:  token.FullName + "创建用户: " + m.Name,
+	}
+	db.Create(&l)
+	handle.ReturnSuccess("ok", r, c)
+}
+
+// UpdateMember 更新客户信息
+func UpdateMember(c *gin.Context) {
+	var r model.Member
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var m model.Member
+	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
+		return
+	}
+	if err := db.Updates(&r).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "门店更新失败", c)
+		return
+	}
+	// 创建用户记录
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	l := model.UserLog{
+		Operator: token.UserID,
+		Action:   "Review Member",
+		Member:   m.ID,
+		Remarks:  token.FullName + "更新用户: " + r.Name,
+	}
+	db.Create(&l)
+	handle.ReturnSuccess("ok", r, c)
+}
+
+// MemberList 客户列表
+func MemberList(c *gin.Context) {
+	var r struct {
+		Name   string `json:"name"`
+		Limit  int    `json:"limit"`
+		Offset int    `json:"offset"`
+	}
+	var members []model.Member
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	sql := db
+	if r.Name != "" {
+		sql = sql.Where("real_name like '%" + r.Name + "%'")
+	}
+	if r.Limit != 0 {
+		sql = sql.Limit(r.Limit)
+	} else {
+		sql = sql.Limit(10)
+	}
+	sql.Offset(r.Offset).Find(&members)
+	handle.ReturnSuccess("ok", members, c)
+}
+
+// MemberReview 客户审核
+func MemberReview(c *gin.Context) {
+	var r struct {
+		ID     int    `json:"id" binding:"required"`
+		Status int8   `json:"status" binding:"required"`
+		Remark string `json:"remark"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var m model.Member
+	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
+		return
+	}
+	m.Status = r.Status
+	if err := db.Save(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "审核失败", c)
+		return
+	}
+	// 创建用户记录
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var msg string
+	if r.Status == 1 {
+		msg = token.FullName + "审核用户通过: " + m.Name
+	} else if r.Status == 2 {
+		msg = token.FullName + "审核用户拒绝: " + r.Remark
+	}
+	l := model.UserLog{
+		Operator: token.UserID,
+		Action:   "Review Member",
+		Member:   m.ID,
+		Remarks:  msg,
+	}
+	db.Create(&l)
+	handle.ReturnSuccess("ok", m, c)
+}
