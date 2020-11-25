@@ -121,27 +121,44 @@ func UpdateMember(c *gin.Context) {
 // MemberList 客户列表
 func MemberList(c *gin.Context) {
 	var r struct {
-		Name   string `json:"name"`
-		Limit  int    `json:"limit"`
-		Offset int    `json:"offset"`
+		Name            string `json:"name"`
+		Page            int    `json:"page"`
+		Limit           int    `json:"limit"`
+		Status          int    `json:"status"`
+		OperationsStaff int    `json:"operations_staff"`
+		BusinessPeople  int    `json:"business_people"`
 	}
 	var members []model.Member
+	var count int64
+	var pages int
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
 	db := config.GetMysql()
-	sql := db
+	sql := db.Where("status = ?", r.Status)
 	if r.Name != "" {
-		sql = sql.Where("real_name like '%" + r.Name + "%'")
+		sql = sql.Where("name like '%" + r.Name + "%'")
 	}
 	if r.Limit != 0 {
 		sql = sql.Limit(r.Limit)
 	} else {
 		sql = sql.Limit(10)
 	}
-	sql.Offset(r.Offset).Find(&members)
-	handle.ReturnSuccess("ok", members, c)
+	if r.BusinessPeople != 0 {
+		sql = sql.Where("business_people = ?", r.BusinessPeople)
+	}
+	if r.OperationsStaff != 0 {
+		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
+	}
+	sql.Offset((r.Page - 1) * 10).Find(&members).Count(&count)
+	if int(count)%r.Limit != 0 {
+		pages = int(count)/r.Limit + 1
+	} else {
+		pages = int(count) / r.Limit
+	}
+	currPage := r.Page/r.Limit + 1
+	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": currPage}, c)
 }
 
 // MemberReview 客户审核
