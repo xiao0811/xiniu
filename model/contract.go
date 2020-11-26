@@ -28,7 +28,9 @@ type Contract struct {
 	Status                   int8   `json:"status"`
 	Type                     int8   `json:"type"`
 	Task                     string `json:"task"`
-	Remarks                  string `json:"remarks"` // 备注
+	Remarks                  string `json:"remarks"`          // 备注
+	OperationsStaff          string `json:"operations_staff"` // 运营人员
+	BusinessPeople           string `json:"business_people"`  // 业务人员
 	CreatedAt                MyTime `json:"created_at"`
 	UpdatedAt                MyTime `json:"updated_at"`
 }

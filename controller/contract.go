@@ -47,6 +47,14 @@ func CreateContract(c *gin.Context) {
 	_CooperationTime, _ := time.ParseInLocation(model.TimeFormat, r.CooperationTime, time.Local)
 	_ExpireTime, _ := time.ParseInLocation(model.TimeFormat, r.ExpireTime, time.Local)
 	_DelayTime, _ := time.ParseInLocation(model.TimeFormat, r.DelayTime, time.Local)
+	var operations model.User
+	var business model.User
+	var member model.Member
+	if r.MemberID != 0 {
+		db.Where("id = ?", r.MemberID).First(&member)
+	}
+	db.Where("id = ?", member.OperationsStaff).First(&operations)
+	db.Where("id = ?", member.BusinessPeople).First(&business)
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
@@ -70,6 +78,8 @@ func CreateContract(c *gin.Context) {
 		CurrentStatusOfPromotion: r.CurrentStatusOfPromotion,
 		Upgrade:                  r.Upgrade,
 		IncludeDetailsPage:       r.IncludeDetailsPage,
+		OperationsStaff:          operations.RealName,
+		BusinessPeople:           business.RealName,
 		Remarks:                  r.Remarks,
 		Status:                   2,
 	}
@@ -217,3 +227,6 @@ func GetContractDetails(c *gin.Context) {
 	db.Where("id = ?", r.ID).First(&co)
 	handle.ReturnSuccess("ok", co, c)
 }
+
+// ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
+// ALTER TABLE contracts ADD COLUMN `business_people` VARCHAR(10);
