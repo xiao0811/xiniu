@@ -84,3 +84,126 @@ func CreateContract(c *gin.Context) {
 	db.Create(&l)
 	handle.ReturnSuccess("ok", con, c)
 }
+
+// ContractList 合约列表
+func ContractList(c *gin.Context) {
+	var r struct {
+		UUID     string `json:"uuid"`
+		MemberID uint   `json:"member_id"`
+		Status   int    `json:"status"`
+		Page     int    `json:"page"`
+		Limit    int    `json:"limit"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var contracts []model.Contract
+	var count int64
+	var pages int
+	sql := db.Where("1 = 1")
+	if r.UUID != "" {
+		sql = sql.Where("uuid = ?", r.UUID)
+	}
+	if r.MemberID != 0 {
+		sql = sql.Where("member_id = ?", r.MemberID)
+	}
+	if r.Status != -1 {
+		sql = sql.Where("status = ?", r.Status)
+	}
+	sql.Offset((r.Page - 1) * 10).Find(&contracts).Count(&count)
+	if int(count)%r.Limit != 0 {
+		pages = int(count)/r.Limit + 1
+	} else {
+		pages = int(count) / r.Limit
+	}
+	currPage := r.Page/r.Limit + 1
+	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": currPage}, c)
+}
+
+// UpdateContract 更新合约
+func UpdateContract(c *gin.Context) {
+	var r model.Contract
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	var co model.Contract
+	db := config.GetMysql()
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
+		return
+	}
+	if err := db.Updates(&r).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "合约更新失败", c)
+		return
+	}
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	l := model.UserLog{
+		Operator: token.UserID,
+		Action:   "Update Contact",
+		Contract: r.ID,
+		Remarks:  token.FullName + "更新合约: " + r.UUID,
+	}
+	db.Create(&l)
+
+	handle.ReturnSuccess("ok", r, c)
+}
+
+// ContractReview 合约审核
+func ContractReview(c *gin.Context) {
+	var r struct {
+		ID     int    `json:"id" binding:"required"`
+		Status int8   `json:"status" binding:"required"`
+		Remark string `json:"remark"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var co model.Contract
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
+		return
+	}
+	co.Status = r.Status
+	if err := db.Save(&co).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "审核失败", c)
+		return
+	}
+	// 创建用户记录
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var msg string
+	if r.Status == 1 {
+		msg = token.FullName + "审核合约通过: " + strconv.Itoa(r.ID)
+	} else if r.Status == 2 {
+		msg = token.FullName + "审核用户拒绝: " + r.Remark
+	}
+	l := model.UserLog{
+		Operator: token.UserID,
+		Action:   "Review Contract",
+		Member:   co.ID,
+		Remarks:  msg,
+	}
+	db.Create(&l)
+	handle.ReturnSuccess("ok", co, c)
+}
+
+// GetContractDetails 合约详情
+func GetContractDetails(c *gin.Context) {
+	var r struct {
+		ID int `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var co model.Contract
+	db.Where("id = ?", r.ID).First(&co)
+	handle.ReturnSuccess("ok", co, c)
+}
