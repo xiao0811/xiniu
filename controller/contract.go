@@ -81,7 +81,7 @@ func CreateContract(c *gin.Context) {
 		OperationsStaff:          operations.RealName,
 		BusinessPeople:           business.RealName,
 		Remarks:                  r.Remarks,
-		Status:                   2,
+		Status:                   0,
 	}
 	if err := db.Create(&con).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
