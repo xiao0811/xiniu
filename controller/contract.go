@@ -44,9 +44,9 @@ func CreateContract(c *gin.Context) {
 	db := config.GetMysql()
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
-	_CooperationTime, _ := time.ParseInLocation(model.TimeFormat, r.CooperationTime, time.Local)
-	_ExpireTime, _ := time.ParseInLocation(model.TimeFormat, r.ExpireTime, time.Local)
-	_DelayTime, _ := time.ParseInLocation(model.TimeFormat, r.DelayTime, time.Local)
+	_CooperationTime, _ := time.ParseInLocation("2006-01-02", r.CooperationTime, time.Local)
+	_ExpireTime, _ := time.ParseInLocation("2006-01-02", r.ExpireTime, time.Local)
+	_DelayTime, _ := time.ParseInLocation("2006-01-02", r.DelayTime, time.Local)
 	var operations model.User
 	var business model.User
 	var member model.Member

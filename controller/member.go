@@ -85,7 +85,7 @@ func CreateMember(c *gin.Context) {
 		Remarks:  token.FullName + "创建用户: " + m.Name,
 	}
 	db.Create(&l)
-	handle.ReturnSuccess("ok", r, c)
+	handle.ReturnSuccess("ok", m, c)
 }
 
 // UpdateMember 更新客户信息
