@@ -228,5 +228,74 @@ func GetContractDetails(c *gin.Context) {
 	handle.ReturnSuccess("ok", co, c)
 }
 
+// ContractExtension 合约延期
+func ContractExtension(c *gin.Context) {
+	var r struct {
+		ID        uint   `json:"id" binding:"required"`
+		Extension string `json:"extension" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	var co model.Contract
+	db := config.GetMysql()
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
+		return
+	}
+	dt, _ := time.ParseInLocation("2006-01-02", r.Extension, time.Local)
+	co.ExpireTime = model.MyTime{Time: dt}
+	if err := db.Save(&co).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "延期修改失败", c)
+		return
+	}
+
+	handle.ReturnSuccess("ok", co, c)
+}
+
+// Task 七日任务
+type Task struct {
+	ID   int    `json:"id" binding:"required"`
+	Task string `json:"task"`
+}
+
+// GetContractTask 获取合约七日任务任务
+func GetContractTask(c *gin.Context) {
+	var r Task
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var co model.Contract
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
+		return
+	}
+	handle.ReturnSuccess("ok", r, c)
+}
+
+// UpdateContractTask 获取合约七日任务任务
+func UpdateContractTask(c *gin.Context) {
+	var r Task
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var co model.Contract
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
+		return
+	}
+	co.Task = r.Task
+	if err := db.Save(&co).Error; err != nil {
+		handle.ReturnError(http.StatusInternalServerError, "七日任务修改失败", c)
+		return
+	}
+	handle.ReturnSuccess("ok", co, c)
+}
+
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
 // ALTER TABLE contracts ADD COLUMN `business_people` VARCHAR(10);

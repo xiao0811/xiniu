@@ -77,6 +77,12 @@ func GetRouter() *gin.Engine {
 		contract.POST("/review", controller.ContractReview)
 		contract.POST("/contract_list", controller.ContractList)
 		contract.POST("/get_member_details", controller.GetContractDetails)
+		// 合约延期
+		contract.POST("/extension", controller.ContractExtension)
+		// 获取合约七日任务
+		contract.POST("/get_task", controller.GetContractTask)
+		// 修改七日任务
+		contract.POST("/update_task", controller.UpdateContractTask)
 	}
 	return app
 }
