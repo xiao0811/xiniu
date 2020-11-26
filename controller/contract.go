@@ -115,7 +115,7 @@ func ContractList(c *gin.Context) {
 	var contracts []model.Contract
 	var count int64
 	var pages int
-	sql := db.Where("1 = 1")
+	sql := db.Preload("Member")
 	if r.UUID != "" {
 		sql = sql.Where("uuid = ?", r.UUID)
 	}
