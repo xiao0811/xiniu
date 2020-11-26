@@ -73,7 +73,10 @@ func CreateContract(c *gin.Context) {
 		Remarks:                  r.Remarks,
 		Status:                   2,
 	}
-	db.Create(&con)
+	if err := db.Create(&con).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+		return
+	}
 	// 创建用户记录
 	l := model.UserLog{
 		Operator: token.UserID,
@@ -113,6 +116,13 @@ func ContractList(c *gin.Context) {
 		sql = sql.Where("status = ?", r.Status)
 	}
 	sql.Offset((r.Page - 1) * 10).Find(&contracts).Count(&count)
+	if count == 0 {
+		handle.ReturnSuccess("ok", nil, c)
+		return
+	}
+	if r.Limit == 0 {
+		r.Limit = 10
+	}
 	if int(count)%r.Limit != 0 {
 		pages = int(count)/r.Limit + 1
 	} else {
