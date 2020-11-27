@@ -340,11 +340,11 @@ func GetContractByStatus(c *gin.Context) {
 		db.Preload("Contracts").Where("created_at > ?", time.Now()).Find(&members)
 	} else if r.Type == "inserve" { // 服务中客户
 		db.Preload("Contracts").Where("status = 1").
-			Where("expire_time > ", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
+			Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
 			Find(&members)
 	} else if r.Type == "beexpire" { // 即将断约
 		db.Preload("Contracts").Where("status = 1").
-			Where("expire_time < ", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
+			Where("expire_time < ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
 			Find(&members)
 	} else if r.Type == "renewal" { // 续约客户
 		db.Preload("Contracts").Where("number_of_contracts > 1").Find(&members)
