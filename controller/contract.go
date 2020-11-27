@@ -333,15 +333,29 @@ func GetContractByStatus(c *gin.Context) {
 	}
 	var members []model.Member
 	db := config.GetMysql()
-	if r.Type == "newly" {
-		db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at DESC").Limit(1)
-		}).Find(&members)
+	if r.Type == "newly" { // 新签客户
+		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+		// 	return db.Order("created_at DESC").Limit(1)
+		// }).Find(&members)
+		db.Preload("Contracts").Where("created_at > ?", time.Now()).Find(&members)
+	} else if r.Type == "inserve" { // 服务中客户
+		db.Preload("Contracts").Where("status = 1").
+			Where("expire_time > ", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
+			Find(&members)
+	} else if r.Type == "beexpire" { // 即将断约
+		db.Preload("Contracts").Where("status = 1").
+			Where("expire_time < ", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
+			Find(&members)
+	} else if r.Type == "renewal" { // 续约客户
+		db.Preload("Contracts").Where("number_of_contracts > 1").Find(&members)
+	} else if r.Type == "break" { // 断约客户
+		db.Preload("Contracts").Where("expire_time < ?", time.Now().Format("2006-01-02")).Find(&members)
+	} else if r.Type == "return" { // 退款客户
+		db.Preload("Contracts").Where("refund is NOT NULL").Find(&members)
+	} else if r.Type == "recycle" { // 回收站
+		db.Preload("Contracts").Where("status = 3").Find(&members)
 	}
 
-	db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at DESC").Limit(1)
-	}).Find(&members)
 	handle.ReturnSuccess("ok", members, c)
 }
 

@@ -27,9 +27,17 @@ type Member struct {
 	Auditors          uint       `json:"auditors"`                                   // 审核人员
 	Type              int8       `json:"type"`                                       // 备注信息
 	Contracts         []Contract `json:"contracts"`
-	FirstCreate       MyTime     `json:"first_creat"` // 第一次创建合约时间
+	FirstCreate       MyTime     `json:"first_creat"`         // 第一次创建合约时间
+	ExpireTime        MyTime     `json:"expire_time"`         // 到期时间
+	NumberOfContracts uint8      `json:"number_of_contracts"` // 合约数
+	Refund            MyTime     `json:"refund"`              // 退款
 	Status            int8       `json:"status"`
 	Remarks           string     `json:"remarks"`
 	CreatedAt         MyTime     `json:"created_at"`
 	UpdatedAt         MyTime     `json:"updated_at"`
 }
+
+// ALTER TABLE members ADD COLUMN `first_create` datetime(3);
+// ALTER TABLE members ADD COLUMN `expire_time` datetime(3);
+// ALTER TABLE members ADD COLUMN `number_of_contracts` tinyint unsigned;
+// ALTER TABLE members ADD COLUMN `refund` datetime(3);
