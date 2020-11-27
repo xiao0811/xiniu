@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/handle"
 	"github.com/xiao0811/xiniu/model"
+	"gorm.io/gorm"
 )
 
 // CreateContract 创建新的合约
@@ -55,6 +57,9 @@ func CreateContract(c *gin.Context) {
 	}
 	db.Where("id = ?", member.OperationsStaff).First(&operations)
 	db.Where("id = ?", member.BusinessPeople).First(&business)
+	if member.FirstCreate.String() == "" {
+		member.FirstCreate = model.MyTime{Time: time.Now()}
+	}
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
@@ -83,18 +88,37 @@ func CreateContract(c *gin.Context) {
 		Remarks:                  r.Remarks,
 		Status:                   0,
 	}
-	if err := db.Create(&con).Error; err != nil {
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := db.Create(&con).Error; err != nil {
+			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+			return err
+		}
+
+		if err := db.Save(&member).Error; err != nil {
+			return err
+		}
+
+		// 创建用户记录
+		l := model.UserLog{
+			Operator: token.UserID,
+			Action:   "Create Contact",
+			Contract: con.ID,
+			Remarks:  token.FullName + "创建合约: " + con.UUID,
+		}
+		if err := db.Create(&l).Error; err != nil {
+			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
 		handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
 		return
 	}
-	// 创建用户记录
-	l := model.UserLog{
-		Operator: token.UserID,
-		Action:   "Create Contact",
-		Contract: con.ID,
-		Remarks:  token.FullName + "创建合约: " + con.UUID,
-	}
-	db.Create(&l)
+
 	handle.ReturnSuccess("ok", con, c)
 }
 
@@ -267,13 +291,14 @@ func GetContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
+	fmt.Println(r.ID)
 	db := config.GetMysql()
 	var co model.Contract
-	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
 		return
 	}
-	handle.ReturnSuccess("ok", r, c)
+	handle.ReturnSuccess("ok", co, c)
 }
 
 // UpdateContractTask 获取合约七日任务任务
@@ -285,7 +310,7 @@ func UpdateContractTask(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var co model.Contract
-	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
 		return
 	}
@@ -297,5 +322,28 @@ func UpdateContractTask(c *gin.Context) {
 	handle.ReturnSuccess("ok", co, c)
 }
 
+// GetContractByStatus 获取不同状态的合约 - 客户形式显示
+func GetContractByStatus(c *gin.Context) {
+	var r struct {
+		Type string `json:"type" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	var members []model.Member
+	db := config.GetMysql()
+	if r.Type == "newly" {
+		db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at DESC").Limit(1)
+		}).Find(&members)
+	}
+
+	db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at DESC").Limit(1)
+	}).Find(&members)
+	handle.ReturnSuccess("ok", members, c)
+}
+
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
-// ALTER TABLE contracts ADD COLUMN `business_people` VARCHAR(10);
+// ALTER TABLE members ADD COLUMN `first_create` datetime(3);
