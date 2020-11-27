@@ -23,7 +23,7 @@ func GetRouter() *gin.Engine {
 	app.POST("/send_change_password_message", controller.SendChangePasswordMessage)
 	// 修改密码
 	app.POST("/change_password", controller.ChangePassword)
-
+	app.GET("test", controller.Test)
 	token := app.Group("/v1/")
 	token.Use(middleware.VerifyToken())
 

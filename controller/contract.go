@@ -57,7 +57,7 @@ func CreateContract(c *gin.Context) {
 	}
 	db.Where("id = ?", member.OperationsStaff).First(&operations)
 	db.Where("id = ?", member.BusinessPeople).First(&business)
-	if member.FirstCreate.String() == "" {
+	if member.FirstCreate.String() == "0001-01-01 00:00:00 +0000 UTC" {
 		member.FirstCreate = model.MyTime{Time: time.Now()}
 	}
 	con := model.Contract{
