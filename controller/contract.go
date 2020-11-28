@@ -341,7 +341,7 @@ func GetContractByStatus(c *gin.Context) {
 		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
 		// 	return db.Order("created_at DESC").Limit(1)
 		// }).Find(&members)
-		db.Preload("Contracts").Where("first_create > ?", time.Now().Add(-30*24*time.Hour)).Find(&members)
+		db.Preload("Contracts").Where("first_create > ?", time.Now().Add(-30*24*time.Hour)).Find(&members).Count(&count)
 	} else if r.Type == "inserve" { // 服务中客户
 		db.Preload("Contracts").Where("status = 1").
 			Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
