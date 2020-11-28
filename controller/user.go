@@ -29,7 +29,7 @@ type CreateUserRequest struct {
 func CreateUser(c *gin.Context) {
 	var r CreateUserRequest
 	var user model.User
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
@@ -79,7 +79,7 @@ func GetUserDetails(c *gin.Context) {
 		return
 	}
 	var user model.User
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户未找到", c)
 		return
@@ -96,7 +96,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	var user model.User
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户未找到", c)
 		return
@@ -118,7 +118,7 @@ func SendChangePasswordMessage(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	rc := config.GetRedis()
 	defer rc.Close()
 	var user model.User
@@ -167,7 +167,7 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	var user model.User
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("phone = ?", r.Phone).First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "手机号码不正确", c)
 		return
@@ -196,7 +196,7 @@ func UserList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var users []model.User
 	var count int64
 	sql := db.Preload("Marshalling").Where("status = 1")
@@ -240,7 +240,7 @@ func DeleteUser(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var user model.User
 	if err := db.Where("id = ?", r.ID).First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
@@ -265,7 +265,7 @@ func UserBatchGroup(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var group model.Marshalling
 	if err := db.Where("id = ?", r.GroupID).First(&group).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "组别不存在", c)

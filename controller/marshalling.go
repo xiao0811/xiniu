@@ -35,7 +35,7 @@ func CreateMarshalling(c *gin.Context) {
 		Type:   r.Type,
 		Status: 1,
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Create(&m).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "输入数据格式不正确", c)
 		return
@@ -52,7 +52,7 @@ func UpdateMarshalling(c *gin.Context) {
 		return
 	}
 	var m model.Marshalling
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据不正确", c)
 		return
@@ -74,7 +74,7 @@ func DeleteMarshalling(c *gin.Context) {
 		return
 	}
 	var m model.Marshalling
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据不正确", c)
 		return
@@ -99,7 +99,7 @@ func MarshallingList(c *gin.Context) {
 		return
 	}
 	var marshallings []model.Marshalling
-	db := config.GetMysql()
+	db := config.MysqlConn
 	sql := db.Where("status = 1")
 	if r.Type != 0 {
 		sql = sql.Where("type = ?", r.Type)

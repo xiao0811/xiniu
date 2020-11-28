@@ -19,7 +19,7 @@ func GroupList(c *gin.Context) {
 		return
 	}
 
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var groups []model.LabelGroup
 	sql := db.Where("status = 1").Preload("Labels")
 	if r.Type != 0 {
@@ -41,7 +41,7 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	db := config.GetMysql()
+	db := config.MysqlConn
 	group := model.LabelGroup{
 		Name:   r.Name,
 		Status: 1,
@@ -63,7 +63,7 @@ func UpdateGroup(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var group model.LabelGroup
 
 	if err := db.Where("id = ?", r.ID).First(&group).Error; err != nil {
@@ -86,7 +86,7 @@ func DeleteGroup(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var group model.LabelGroup
 
 	if err := db.Where("id = ?", r.ID).First(&group).Error; err != nil {
@@ -110,7 +110,7 @@ func GroupDetails(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var group model.LabelGroup
 	db.Where("id = ?", r.ID).First(&group)
 	handle.ReturnSuccess("ok", group, c)

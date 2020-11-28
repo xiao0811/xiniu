@@ -42,7 +42,7 @@ func CreateMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	if err := db.Where("name = ?", r.Name).First(&m).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "门店已存在", c)
 		return
@@ -95,7 +95,7 @@ func UpdateMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确"+err.Error(), c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var m model.Member
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
@@ -135,21 +135,21 @@ func MemberList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	sql := db.Where("status = ?", r.Status)
 	if r.Name != "" {
 		sql = sql.Where("name like '%" + r.Name + "%'")
-	}
-	if r.Limit != 0 {
-		sql = sql.Limit(r.Limit)
-	} else {
-		sql = sql.Limit(10)
 	}
 	if r.BusinessPeople != 0 {
 		sql = sql.Where("business_people = ?", r.BusinessPeople)
 	}
 	if r.OperationsStaff != 0 {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
+	}
+	if r.Limit != 0 {
+		sql = sql.Limit(r.Limit)
+	} else {
+		sql = sql.Limit(10)
 	}
 	sql.Offset((r.Page - 1) * 10).Find(&members).Count(&count)
 	if int(count)%r.Limit != 0 {
@@ -172,7 +172,7 @@ func MemberReview(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var m model.Member
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
@@ -212,7 +212,7 @@ func GetMemberDetails(c *gin.Context) {
 		return
 	}
 	var member model.Member
-	db := config.GetMysql()
+	db := config.MysqlConn
 	sql := db.Where("id = ?", r.ID)
 	if err := sql.First(&member).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)

@@ -23,7 +23,7 @@ var (
 
 // Login 用户登录
 func Login(c *gin.Context) {
-	db := config.GetMysql()
+	db := config.MysqlConn
 	var lq LoginRequest
 	var user model.User
 	if err := c.ShouldBind(&lq); err != nil {
@@ -68,7 +68,7 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 	var user model.User
-	db := config.GetMysql()
+	db := config.MysqlConn
 	db.Preload("Marshalling").Where("phone = ?", token.Phone).First(&user)
 	handle.ReturnSuccess("ok", user, c)
 }
