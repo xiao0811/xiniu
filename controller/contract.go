@@ -325,7 +325,9 @@ func UpdateContractTask(c *gin.Context) {
 // GetContractByStatus 获取不同状态的合约 - 客户形式显示
 func GetContractByStatus(c *gin.Context) {
 	var r struct {
-		Type string `json:"type" binding:"required"`
+		Type  string `json:"type" binding:"required"`
+		Page  int    `json:"page"`
+		Limit int    `json:"limit"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -333,6 +335,8 @@ func GetContractByStatus(c *gin.Context) {
 	}
 	var members []model.Member
 	db := config.GetMysql()
+	var count int64
+	var pages int
 	if r.Type == "newly" { // 新签客户
 		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
 		// 	return db.Order("created_at DESC").Limit(1)
@@ -341,22 +345,34 @@ func GetContractByStatus(c *gin.Context) {
 	} else if r.Type == "inserve" { // 服务中客户
 		db.Preload("Contracts").Where("status = 1").
 			Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
-			Find(&members)
+			Find(&members).Count(&count)
 	} else if r.Type == "beexpire" { // 即将断约
 		db.Preload("Contracts").Where("status = 1").
 			Where("expire_time < ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
-			Find(&members)
+			Find(&members).Count(&count)
 	} else if r.Type == "renewal" { // 续约客户
-		db.Preload("Contracts").Where("number_of_contracts > 1").Find(&members)
+		db.Preload("Contracts").Where("number_of_contracts > 1").Find(&members).Count(&count)
 	} else if r.Type == "break" { // 断约客户
-		db.Preload("Contracts").Where("expire_time < ?", time.Now().Format("2006-01-02")).Find(&members)
+		db.Preload("Contracts").Where("expire_time < ?", time.Now().Format("2006-01-02")).Find(&members).Count(&count)
 	} else if r.Type == "return" { // 退款客户
-		db.Preload("Contracts").Where("refund is NOT NULL").Find(&members)
+		db.Preload("Contracts").Where("refund is NOT NULL").Find(&members).Count(&count)
 	} else if r.Type == "recycle" { // 回收站
-		db.Preload("Contracts").Where("status = 3").Find(&members)
+		db.Preload("Contracts").Where("status = 3").Find(&members).Count(&count)
 	}
-
-	handle.ReturnSuccess("ok", members, c)
+	if count == 0 {
+		handle.ReturnSuccess("ok", nil, c)
+		return
+	}
+	if r.Limit == 0 {
+		r.Limit = 10
+	}
+	if int(count)%r.Limit != 0 {
+		pages = int(count)/r.Limit + 1
+	} else {
+		pages = int(count) / r.Limit
+	}
+	currPage := r.Page/r.Limit + 1
+	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": currPage}, c)
 }
 
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
