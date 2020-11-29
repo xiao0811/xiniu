@@ -97,8 +97,6 @@ func GetContractTaskList(c *gin.Context) {
 		Type            uint8  `json:"type"`
 		ContractID      uint   `json:"contract_id"`
 		OperationsStaff string `json:"operations_staff"`
-		Limit           int    `json:"limit"`
-		Page            int    `json:"page"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -107,8 +105,6 @@ func GetContractTaskList(c *gin.Context) {
 	db := config.MysqlConn
 	sql := db
 	var cts []model.ContractTask
-	var count int64
-	var pages int
 	if r.Type != 0 {
 		sql = sql.Where("type = ?", r.Type)
 	}
@@ -118,20 +114,7 @@ func GetContractTaskList(c *gin.Context) {
 	if r.OperationsStaff != "" {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
 	}
-	sql.Order("created_at desc").Find(&cts).Count(&count)
-	if count == 0 {
-		handle.ReturnSuccess("ok", nil, c)
-		return
-	}
+	sql.Order("created_at desc").Find(&cts)
 
-	if r.Limit == 0 {
-		r.Limit = 10
-	}
-	if int(count)%r.Limit != 0 {
-		pages = int(count)/r.Limit + 1
-	} else {
-		pages = int(count) / r.Limit
-	}
-	currPage := r.Page/r.Limit + 1
-	handle.ReturnSuccess("ok", gin.H{"tasks": cts, "pages": pages, "currPage": currPage}, c)
+	handle.ReturnSuccess("ok", cts, c)
 }
