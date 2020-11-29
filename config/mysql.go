@@ -29,5 +29,6 @@ func init() {
 		&model.Member{},
 		&model.UserLog{},
 		&model.Contract{},
+		&model.ContractTask{},
 	)
 }

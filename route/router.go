@@ -84,5 +84,12 @@ func GetRouter() *gin.Engine {
 		contract.POST("/update_task", controller.UpdateContractTask)
 		contract.POST("/get_contract_by_status", controller.GetContractByStatus)
 	}
+
+	cts := token.Group("/contract_task")
+	{
+		cts.POST("/create", controller.CreateContractTask)
+		cts.POST("/delete", controller.DeleteContractTask)
+		cts.POST("/get_list", controller.GetContractTaskList)
+	}
 	return app
 }
