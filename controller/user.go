@@ -60,6 +60,7 @@ func CreateUser(c *gin.Context) {
 		Role:           r.Role,
 		MarshallingID:  m,
 		Status:         1,
+		Duty:           r.Duty,
 	}
 
 	if err := db.Create(&user).Error; err != nil {

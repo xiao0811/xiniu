@@ -46,6 +46,10 @@ func CreateContract(c *gin.Context) {
 	db := config.MysqlConn
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
+	// 没传延期时间则设置为到期时间
+	if r.DelayTime == "" {
+		r.DelayTime = r.ExpireTime
+	}
 	_CooperationTime, _ := time.ParseInLocation("2006-01-02", r.CooperationTime, time.Local)
 	_ExpireTime, _ := time.ParseInLocation("2006-01-02", r.ExpireTime, time.Local)
 	_DelayTime, _ := time.ParseInLocation("2006-01-02", r.DelayTime, time.Local)
@@ -60,10 +64,7 @@ func CreateContract(c *gin.Context) {
 	if member.FirstCreate.String() == "0001-01-01 00:00:00 +0000 UTC" {
 		member.FirstCreate = model.MyTime{Time: time.Now()}
 	}
-	// 没传延期时间则设置为到期时间
-	if r.DelayTime == "" {
-		r.DelayTime = r.ExpireTime
-	}
+
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
