@@ -16,31 +16,31 @@ import (
 // CreateContract 创建新的合约
 func CreateContract(c *gin.Context) {
 	var r struct {
-		MemberID                 uint   `json:"member_id"`                   // 门店名称
-		CooperationTime          string `json:"cooperation_time"`            // 合作时间
-		ExpireTime               string `json:"expire_time"`                 // 到期时间
-		IsStartService           bool   `json:"is_start_service"`            // 是否开始服务
-		DelayTime                string `json:"delay_time"`                  // 延期后到期时间
-		ContractAmount           uint   `json:"contract_amount"`             // 签约金额
-		Arrives                  bool   `json:"arrives"`                     // 是否到账
-		Arrears                  uint   `json:"arrears"`                     // 有无欠款
-		CurrentStoreCollections  uint   `json:"current_store_collections"`   // 目前门店收藏量
-		CurrentNumber            uint   `json:"current_number"`              // 目前评价数
-		CurrentStar              uint   `json:"current_star"`                // 目前星级
-		CurrentLeaderboard       string `json:"current_leaderboard"`         // 目前排行榜
-		StoreCollections         uint   `json:"store_collections"`           // 门店收藏量
-		InformationFlow          uint   `json:"information_flow"`            // 信息流
-		BigVReview               uint   `json:"big_v_review"`                // 大V评论
-		GroupBuyingVolume        uint   `json:"group_buying_volume"`         // 团购卖量
-		Like                     uint   `json:"like"`                        // 点赞
-		FollowPeers              string `json:"follow_peers"`                // 关注同行
-		CurrentStatusOfPromotion int8   `json:"current_status_of_promotion"` // 推广通现状
-		Upgrade                  bool   `json:"upgrade"`                     // 是否提升金牌店铺
-		IncludeDetailsPage       bool   `json:"include_details_page"`        // 是否包含详情页
-		Remarks                  string `json:"remarks"`                     // 备注
+		MemberID                 uint    `json:"member_id"`                   // 门店名称
+		CooperationTime          string  `json:"cooperation_time"`            // 合作时间
+		ExpireTime               string  `json:"expire_time"`                 // 到期时间
+		IsStartService           bool    `json:"is_start_service"`            // 是否开始服务
+		DelayTime                string  `json:"delay_time"`                  // 延期后到期时间
+		ContractAmount           uint    `json:"contract_amount"`             // 签约金额
+		Arrives                  bool    `json:"arrives"`                     // 是否到账
+		Arrears                  uint    `json:"arrears"`                     // 有无欠款
+		CurrentStoreCollections  uint    `json:"current_store_collections"`   // 目前门店收藏量
+		CurrentNumber            uint    `json:"current_number"`              // 目前评价数
+		CurrentStar              float32 `json:"current_star"`                // 目前星级
+		CurrentLeaderboard       string  `json:"current_leaderboard"`         // 目前排行榜
+		StoreCollections         uint    `json:"store_collections"`           // 门店收藏量
+		InformationFlow          uint    `json:"information_flow"`            // 信息流
+		BigVReview               uint    `json:"big_v_review"`                // 大V评论
+		GroupBuyingVolume        uint    `json:"group_buying_volume"`         // 团购卖量
+		Like                     uint    `json:"like"`                        // 点赞
+		FollowPeers              string  `json:"follow_peers"`                // 关注同行
+		CurrentStatusOfPromotion int8    `json:"current_status_of_promotion"` // 推广通现状
+		Upgrade                  bool    `json:"upgrade"`                     // 是否提升金牌店铺
+		IncludeDetailsPage       bool    `json:"include_details_page"`        // 是否包含详情页
+		Remarks                  string  `json:"remarks"`                     // 备注
 	}
 	if err := c.ShouldBind(&r); err != nil {
-		handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+		handle.ReturnError(http.StatusBadRequest, err.Error(), c)
 		return
 	}
 	db := config.MysqlConn

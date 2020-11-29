@@ -32,3 +32,5 @@ func init() {
 		&model.ContractTask{},
 	)
 }
+
+// alter table contracts modify column current_star DECIMAL(3,2)
