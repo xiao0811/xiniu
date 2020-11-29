@@ -77,7 +77,7 @@ func CreateContract(c *gin.Context) {
 		Arrears:                  r.Arrears,
 		CurrentStoreCollections:  r.CurrentStoreCollections,
 		CurrentNumber:            r.CurrentNumber,
-		CurrentStar:              r.CurrentStar,
+		CurrentStar:              float32(r.CurrentStar),
 		CurrentLeaderboard:       r.CurrentLeaderboard,
 		StoreCollections:         r.StoreCollections,
 		InformationFlow:          r.InformationFlow,
