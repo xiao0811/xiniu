@@ -17,7 +17,7 @@ func UploadImages(c *gin.Context) {
 	var images []string
 	for _, file := range files {
 		s := strings.Split(file.Filename, ".")
-		name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + s[len(s)-1]
+		name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + "." + s[len(s)-1]
 		// 上传文件到指定的路径
 		if err := c.SaveUploadedFile(file, "./upload/images/"+name); err != nil {
 			log.Println(err)
