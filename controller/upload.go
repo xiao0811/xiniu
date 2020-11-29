@@ -23,7 +23,7 @@ func UploadImages(c *gin.Context) {
 			log.Println(err)
 			continue
 		}
-		images = append(images, "./upload/images/"+name)
+		images = append(images, "/upload/images/"+name)
 	}
 	handle.ReturnSuccess("ok", images, c)
 }
