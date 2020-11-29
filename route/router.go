@@ -25,7 +25,8 @@ func GetRouter() *gin.Engine {
 	app.POST("/change_password", controller.ChangePassword)
 	token := app.Group("/v1/")
 	token.Use(middleware.VerifyToken())
-
+	// 获取图片
+	app.GET("/upload/images/:images_name", controller.ShowImage)
 	user := token.Group("user")
 	{
 		user.POST("/get_info", controller.GetUserInfo)
@@ -90,6 +91,10 @@ func GetRouter() *gin.Engine {
 		cts.POST("/create", controller.CreateContractTask)
 		cts.POST("/delete", controller.DeleteContractTask)
 		cts.POST("/get_list", controller.GetContractTaskList)
+	}
+	upload := token.Group("/upload")
+	{
+		upload.POST("/images", controller.UploadImages)
 	}
 	return app
 }
