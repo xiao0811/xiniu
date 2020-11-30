@@ -335,9 +335,12 @@ func UpdateContractTask(c *gin.Context) {
 // GetContractByStatus 获取不同状态的合约 - 客户形式显示
 func GetContractByStatus(c *gin.Context) {
 	var r struct {
-		Type  string `json:"type" binding:"required"`
-		Page  int    `json:"page"`
-		Limit int    `json:"limit"`
+		Type        string `json:"type" binding:"required"`
+		Date        string `json:"date"`
+		Marshalling uint8  `json:"marshalling"`
+		Page        int    `json:"page"`
+		Limit       int    `json:"limit"`
+		Name        string `json:"name"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -347,28 +350,68 @@ func GetContractByStatus(c *gin.Context) {
 	db := config.MysqlConn
 	var count int64
 	var pages int
+	sql := db.Preload("Contracts")
 	if r.Type == "newly" { // 新签客户
 		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
 		// 	return db.Order("created_at DESC").Limit(1)
 		// }).Find(&members)
-		db.Preload("Contracts").Where("first_create > ?", time.Now().Add(-30*24*time.Hour)).Find(&members).Count(&count)
+		if r.Date != "" {
+			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+				return db.Where("created_at > ? AND created_at < ?", r.Date+"-01", r.Date+"-31").Limit(1)
+			})
+		} else {
+			sql.Where("first_create > ?", time.Now().Add(-30*24*time.Hour))
+		}
 	} else if r.Type == "inserve" { // 服务中客户
-		db.Preload("Contracts").Where("status = 1").
-			Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
-			Find(&members).Count(&count)
+		if r.Date != "" {
+			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
+			})
+		} else {
+			sql.Where("status = 1").Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
+		}
 	} else if r.Type == "beexpire" { // 即将断约
-		db.Preload("Contracts").Where("status = 1").
-			Where("expire_time < ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02")).
-			Find(&members).Count(&count)
+		if r.Date != "" {
+			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
+			})
+		} else {
+			sql.Where("status = 1").Where("expire_time < ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
+		}
 	} else if r.Type == "renewal" { // 续约客户
-		db.Preload("Contracts").Where("number_of_contracts > 1").Find(&members).Count(&count)
+		if r.Date != "" {
+			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
+			})
+		}
+		sql.Where("number_of_contracts > 1")
 	} else if r.Type == "break" { // 断约客户
-		db.Preload("Contracts").Where("expire_time < ?", time.Now().Format("2006-01-02")).Find(&members).Count(&count)
+		if r.Date != "" {
+			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
+				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
+			})
+		}
+		sql.Where("expire_time < ?", time.Now().Format("2006-01-02"))
 	} else if r.Type == "return" { // 退款客户
-		db.Preload("Contracts").Where("refund is NOT NULL").Find(&members).Count(&count)
+		sql.Where("refund is NOT NULL")
 	} else if r.Type == "recycle" { // 回收站
-		db.Preload("Contracts").Where("status = 3").Find(&members).Count(&count)
+		sql.Where("status = 3")
 	}
+	if r.Marshalling != 0 {
+		var users []model.User
+		var userIds []uint
+		db.Select("id").Where("marshalling_id = ? AND status = 1", r.Marshalling).Find(&users)
+		for _, user := range users {
+			userIds = append(userIds, user.ID)
+		}
+		sql = sql.Where("operations_staff in ?", userIds).Or("business_people in ?", userIds)
+	}
+
+	if r.Name != "" {
+		sql.Where("name LIKE ?", "%"+r.Name+"%")
+	}
+
+	sql.Find(&members).Count(&count)
 	if count == 0 {
 		handle.ReturnSuccess("ok", nil, c)
 		return
@@ -385,5 +428,28 @@ func GetContractByStatus(c *gin.Context) {
 	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": currPage}, c)
 }
 
+// ContractRefund 合约退款
+func ContractRefund(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.MysqlConn
+	var contract model.Contract
+	if err := db.Where("id = ?", r.ID).First(&contract).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
+		return
+	}
+	contract.Refund = model.MyTime{Time: time.Now()}
+	if err := db.Save(&contract).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
+		return
+	}
+	handle.ReturnSuccess("ok", contract, c)
+}
+
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
-// ALTER TABLE members ADD COLUMN `first_create` datetime(3);
+// ALTER TABLE members ADD COLUMN `refund` datetime(3);

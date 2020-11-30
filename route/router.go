@@ -84,6 +84,8 @@ func GetRouter() *gin.Engine {
 		// 修改七日任务
 		contract.POST("/update_task", controller.UpdateContractTask)
 		contract.POST("/get_contract_by_status", controller.GetContractByStatus)
+		// 退款
+		contract.POST("/refund", controller.ContractRefund)
 	}
 
 	cts := token.Group("/contract_task")
