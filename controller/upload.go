@@ -13,7 +13,11 @@ import (
 
 // UploadImages 图片上传
 func UploadImages(c *gin.Context) {
-	form, _ := c.MultipartForm()
+	form, err := c.MultipartForm()
+	if err != nil {
+		handle.ReturnError(http.StatusBadRequest, "图片格式不正确", c)
+		return
+	}
 	files := form.File["upload[]"]
 	var images []string
 	for _, file := range files {
@@ -32,7 +36,11 @@ func UploadImages(c *gin.Context) {
 // UploadImage 上传单个图片
 func UploadImage(c *gin.Context) {
 	// 单文件
-	file, _ := c.FormFile("file")
+	file, err := c.FormFile("file")
+	if err != nil {
+		handle.ReturnError(http.StatusBadRequest, "图片格式不正确", c)
+		return
+	}
 	s := strings.Split(file.Filename, ".")
 	name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + "." + s[len(s)-1]
 	// 上传文件到指定的路径
