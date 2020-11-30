@@ -69,7 +69,7 @@ func CreateContract(c *gin.Context) {
 	if member.FirstCreate.String() == "0001-01-01 00:00:00 +0000 UTC" {
 		member.FirstCreate = model.MyTime{Time: time.Now()}
 	}
-
+	member.ExpireTime = _c.DelayTime
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
