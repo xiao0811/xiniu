@@ -103,7 +103,7 @@ func CreateContract(c *gin.Context) {
 			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
 			return err
 		}
-		member.ExpireTime = _c.DelayTime
+		member.ExpireTime = model.MyTime{Time: _DelayTime}
 		member.NumberOfContracts++
 		if err := db.Save(&member).Error; err != nil {
 			return err
