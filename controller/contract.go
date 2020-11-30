@@ -40,10 +40,15 @@ func CreateContract(c *gin.Context) {
 		Remarks                  string  `json:"remarks"`                     // 备注
 	}
 	if err := c.ShouldBind(&r); err != nil {
-		handle.ReturnError(http.StatusBadRequest, err.Error(), c)
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
 	db := config.MysqlConn
+	var _c model.Contract
+	if err := db.Where("status = 1 AND DelayTime > ?", time.Now()).First(&_c).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "存在未完成的合约", c)
+		return
+	}
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
 	// 没传延期时间则设置为到期时间
@@ -99,7 +104,7 @@ func CreateContract(c *gin.Context) {
 			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
 			return err
 		}
-
+		member.NumberOfContracts++
 		if err := db.Save(&member).Error; err != nil {
 			return err
 		}
