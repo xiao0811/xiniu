@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,21 @@ func UploadImages(c *gin.Context) {
 		images = append(images, "/upload/images/"+name)
 	}
 	handle.ReturnSuccess("ok", images, c)
+}
+
+// UploadImage 上传单个图片
+func UploadImage(c *gin.Context) {
+	// 单文件
+	file, _ := c.FormFile("file")
+	s := strings.Split(file.Filename, ".")
+	name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + "." + s[len(s)-1]
+	// 上传文件到指定的路径
+	if err := c.SaveUploadedFile(file, "./upload/images/"+name); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "图片上传失败", c)
+		return
+	}
+	image := "/upload/images/" + name
+	handle.ReturnSuccess("ok", image, c)
 }
 
 // ShowImage 获取图片

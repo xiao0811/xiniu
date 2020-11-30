@@ -451,5 +451,54 @@ func ContractRefund(c *gin.Context) {
 	handle.ReturnSuccess("ok", contract, c)
 }
 
+// ChangeManagement 更换管理人员
+func ChangeManagement(c *gin.Context) {
+	var r struct {
+		ID              uint `json:"id" binding:"required"`
+		OperationsStaff int  `json:"operations_staff"` // 运营人员
+		BusinessPeople  int  `json:"business_people"`  // 业务人员
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.MysqlConn
+	var m model.Member
+	var u model.Contract
+	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
+		return
+	}
+	if r.OperationsStaff != 0 {
+		m.OperationsStaff = r.OperationsStaff
+		var operationsStaff model.User
+		db.Where("id = ?", r.OperationsStaff).First(&operationsStaff)
+		u.OperationsStaff = operationsStaff.RealName
+	}
+	if r.BusinessPeople != 0 {
+		m.BusinessPeople = r.BusinessPeople
+		var businessPeople model.User
+		db.Where("id = ?", r.BusinessPeople).First(&businessPeople)
+		u.OperationsStaff = businessPeople.RealName
+	}
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&m).Error; err != nil {
+			return err
+		}
+
+		if err := db.Model(&model.Contract{}).Where("member_id = ?", r.ID).Updates(u).Error; err != nil {
+			return err
+		}
+
+		// 返回 nil 提交事务
+		return nil
+	})
+	if err != nil {
+		handle.ReturnError(http.StatusBadRequest, "更新失败", c)
+		return
+	}
+	handle.ReturnSuccess("ok", "更新成功", c)
+}
+
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
 // ALTER TABLE members ADD COLUMN `refund` datetime(3);

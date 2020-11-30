@@ -86,6 +86,7 @@ func GetRouter() *gin.Engine {
 		contract.POST("/get_contract_by_status", controller.GetContractByStatus)
 		// 退款
 		contract.POST("/refund", controller.ContractRefund)
+		contract.POST("/change_management", controller.ChangeManagement)
 	}
 
 	cts := token.Group("/contract_task")
@@ -97,6 +98,7 @@ func GetRouter() *gin.Engine {
 	upload := token.Group("/upload")
 	{
 		upload.POST("/images", controller.UploadImages)
+		upload.POST("/image", controller.UploadImage)
 	}
 	return app
 }
