@@ -100,5 +100,13 @@ func GetRouter() *gin.Engine {
 		upload.POST("/images", controller.UploadImages)
 		upload.POST("/image", controller.UploadImage)
 	}
+
+	refund := token.Group("/refund")
+	{
+		refund.POST("/create", controller.CreateRefund)
+		refund.POST("/review", controller.ReviewRefund)
+		refund.POST("/get_details", controller.GetRefundDetails)
+		refund.POST("/list", controller.GetRefundList)
+	}
 	return app
 }

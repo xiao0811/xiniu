@@ -22,7 +22,7 @@ func init() {
 	}
 	db := MysqlConn
 	// 自动迁移
-	db.AutoMigrate(
+	_ = db.AutoMigrate(
 		&model.User{},
 		&model.LabelGroup{},
 		&model.Label{},
@@ -30,6 +30,7 @@ func init() {
 		&model.UserLog{},
 		&model.Contract{},
 		&model.ContractTask{},
+		&model.Refund{},
 	)
 }
 
