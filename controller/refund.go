@@ -22,7 +22,7 @@ func CreateRefund(c *gin.Context) {
 	}
 	db := config.MysqlConn
 	var contract model.Contract
-	if err := db.Where("id = ?", r.ID).First(&contract).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&contract).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
 		return
 	}
@@ -56,7 +56,7 @@ func ReviewRefund(c *gin.Context) {
 	}
 	db := config.MysqlConn
 	var refund model.Refund
-	if err := db.Where("id = ?", r.ID).First(&refund).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&refund).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "退款申请不存在", c)
 		return
 	}
@@ -100,7 +100,7 @@ func GetRefundDetails(c *gin.Context) {
 	}
 	var refund model.Refund
 	db := config.MysqlConn
-	if err := db.Where("id = ?", r.ID).First(&refund).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&refund).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "退款申请不存在", c)
 		return
 	}
