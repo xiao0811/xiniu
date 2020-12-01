@@ -47,7 +47,7 @@ func CreateRefund(c *gin.Context) {
 func ReviewRefund(c *gin.Context) {
 	var r struct {
 		ID     uint   `json:"id" binding:"required"`
-		Status int8   `json:"amount" binding:"required"`
+		Status int8   `json:"status"`
 		Reason string `json:"reason"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
