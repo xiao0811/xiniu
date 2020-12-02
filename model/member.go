@@ -3,7 +3,7 @@ package model
 // Member 客户结构体
 // 审核的状态都是  0待审核  1审核通过  2审核驳回
 type Member struct {
-	ID                uint       `gorm:"primarykey" json:"id" binding:"required"`
+	ID                uint       `gorm:"primarykey" json:"id"`
 	UUID              string     `json:"uuid" gorm:"type:char(26);unique"`           // 用户编号
 	Name              string     `gorm:"type:varchar(50)" json:"name"`               // 门店名称
 	City              string     `json:"city" gorm:"type:varchar(10)"`               // 所在城市

@@ -180,12 +180,12 @@ func ContractList(c *gin.Context) {
 func UpdateContract(c *gin.Context) {
 	var r model.Contract
 	if err := c.ShouldBind(&r); err != nil {
-		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		handle.ReturnError(http.StatusBadRequest, err.Error(), c)
 		return
 	}
 	var co model.Contract
 	db := config.MysqlConn
-	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
 		return
 	}
