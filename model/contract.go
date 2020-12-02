@@ -33,6 +33,7 @@ type Contract struct {
 	OperationsStaff          string  `json:"operations_staff"` // 运营人员
 	BusinessPeople           string  `json:"business_people"`  // 业务人员
 	Refund                   MyTime  `json:"refund"`
+	Reason                   string  `json:"reason"` // 审核备注
 	CreatedAt                MyTime  `json:"created_at"`
 	UpdatedAt                MyTime  `json:"updated_at"`
 }

@@ -108,5 +108,9 @@ func GetRouter() *gin.Engine {
 		refund.POST("/get_details", controller.GetRefundDetails)
 		refund.POST("/list", controller.GetRefundList)
 	}
+	sms := token.Group("sms")
+	{
+		sms.POST("send_message", controller.SendMessage)
+	}
 	return app
 }

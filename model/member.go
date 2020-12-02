@@ -33,6 +33,7 @@ type Member struct {
 	Refund            MyTime     `json:"refund"`              // 退款
 	Status            int8       `json:"status"`
 	Remarks           string     `json:"remarks"`
+	Reason            string     `json:"reason"` // 审核备注
 	CreatedAt         MyTime     `json:"created_at"`
 	UpdatedAt         MyTime     `json:"updated_at"`
 }

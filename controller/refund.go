@@ -74,6 +74,7 @@ func GetRefundList(c *gin.Context) {
 	var r struct {
 		Contract uint `json:"contract"`
 		Status   int8 `json:"status"`
+		Page     int8 `json:"page"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -81,12 +82,20 @@ func GetRefundList(c *gin.Context) {
 	}
 	db := config.MysqlConn
 	var refunds []model.Refund
+	var count int64
+	var pages int
 	sql := db
 	if r.Contract != 0 {
 		sql.Where("contract_id = ?", r.Contract)
 	}
-	sql.Find(&refunds)
-	handle.ReturnSuccess("ok", refunds, c)
+	sql.Find(&refunds).Count(&count)
+	if int(count)%10 != 0 {
+		pages = int(count)/10 + 1
+	} else {
+		pages = int(count) / 10
+	}
+	currPage := r.Page/10 + 1
+	handle.ReturnSuccess("ok", gin.H{"refunds": refunds, "pages": pages, "currPage": currPage}, c)
 }
 
 // GetRefundDetails 获取退款详情
