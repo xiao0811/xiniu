@@ -368,24 +368,24 @@ func GetContractByStatus(c *gin.Context) {
 		date = time.Now().Format("2006-01")
 	}
 	dt, _ := time.ParseInLocation("2006-01", date, time.Local)
-	start := dt.Format("2006-01-02")
-	end := dt.AddDate(0, 1, 0).Format("2006-01-02")
+	start := dt
+	end := dt.AddDate(0, 1, 0)
 
 	switch r.Type {
 	case "newly": // 新签客户
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
-		// select * from contracts where cooperation_time >= "2020-11-01" and cooperation_time < "2020-11-30" and sort = 0;
 	case "inserve": // 服务中客户
-		sql.Where("expire_time > ?", end)
+		sql.Where("expire_time >= ?", end)
 	case "beexpire": // 即将断约
-		sql.Where("expire_time > ?")
+		sql.Where("expire_time > ?", end.AddDate(0, -1, 0))
 	case "renewal": // 续约客户
-		sql.Where("expire_time < ? AND cooperation_time < ?", start, end).Where("sort > 0")
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
 	case "break": // 断约客户
-		// sql.Where("cooperation_time > ? AND cooperation_time < ?", start, end)
-		sql.Where("expire_time < ?", start)
+		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
+		})
 	case "return": // 退款客户
-		sql.Where("refund > ? AND refund < ?", start, end)
+		sql.Where("refund >= ? AND refund < ?", start, end)
 	case "recycle": // 回收站
 	default:
 
