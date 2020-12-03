@@ -69,6 +69,10 @@ func CreateContract(c *gin.Context) {
 	if member.FirstCreate.String() == "0001-01-01 00:00:00 +0000 UTC" {
 		member.FirstCreate = model.MyTime{Time: _CooperationTime}
 	}
+	// 查看用户sort
+	var _sort model.Contract
+	db.Where("id = ?", r.MemberID).Order("created_at desc").First(&_sort)
+	sort := _sort.Sort + 1
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
@@ -96,6 +100,7 @@ func CreateContract(c *gin.Context) {
 		BusinessPeople:           business.RealName,
 		Remarks:                  r.Remarks,
 		Status:                   0,
+		Sort:                     sort,
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
@@ -224,6 +229,11 @@ func ContractReview(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
 		return
 	}
+	var _c model.Contract
+	if err := db.Where("status = 1 AND DelayTime > ?", time.Now()).First(&_c).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "存在未完成的合约", c)
+		return
+	}
 	co.Status = r.Status
 	if err := db.Save(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "审核失败", c)
@@ -348,90 +358,70 @@ func GetContractByStatus(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	var members []model.Member
 	db := config.MysqlConn
-	var count int64
-	var pages int
-	sql := db.Preload("Contracts").Where("status = 1")
-	if r.City != "" {
-		sql.Where("city like ?", "%"+r.City+"%")
+	var contracts []model.Contract
+	sql := db.Preload("Member")
+	var date string
+	if r.Date != "" {
+		date = r.Date
+	} else {
+		date = time.Now().Format("2006-01")
+	}
+	dt, _ := time.ParseInLocation("2006-01", date, time.Local)
+	start := dt.Format("2006-01-02")
+	end := dt.AddDate(0, 1, 0).Format("2006-01-02")
+
+	switch r.Type {
+	case "newly": // 新签客户
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
+		fmt.Println(start, end)
+		// select * from contracts where cooperation_time >= "2020-11-01" and cooperation_time < "2020-11-30" and sort = 0;
+	case "inserve": // 服务中客户
+		sql.Where("expire_time > ?", end)
+	case "beexpire": // 即将断约
+		sql.Where("expire_time > ?")
+	case "renewal": // 续约客户
+		sql.Where("expire_time < ? AND cooperation_time < ?", start, end).Where("sort > 0")
+	case "break": // 断约客户
+		// sql.Where("cooperation_time > ? AND cooperation_time < ?", start, end)
+		sql.Where("expire_time < ?", start)
+	case "return": // 退款客户
+		sql.Where("refund > ? AND refund < ?", start, end)
+	case "recycle": // 回收站
+	default:
+
 	}
 
-	if r.Type == "newly" { // 新签客户
-		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-		// 	return db.Order("created_at DESC").Limit(1)
-		// }).Find(&members)
-		if r.Date != "" {
-			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-				return db.Where("created_at > ? AND created_at < ?", r.Date+"-01", r.Date+"-31").Limit(1)
-			})
-		} else {
-			sql.Where("first_create > ?", time.Now().Add(-30*24*time.Hour))
-		}
-	} else if r.Type == "inserve" { // 服务中客户
-		if r.Date != "" {
-			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
-			})
-		} else {
-			sql.Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
-		}
-	} else if r.Type == "beexpire" { // 即将断约
-		if r.Date != "" {
-			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
-			})
-		} else {
-			sql.Where("expire_time < ?", time.Now().Add(time.Hour*24*30).Format("2006-01-02"))
-		}
-	} else if r.Type == "renewal" { // 续约客户
-		if r.Date != "" {
-			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
-			})
-		}
-		sql.Where("number_of_contracts > 1")
-	} else if r.Type == "break" { // 断约客户
-		if r.Date != "" {
-			sql.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
-				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
-			})
-		}
-		sql.Where("expire_time < ?", time.Now().Format("2006-01-02"))
-	} else if r.Type == "return" { // 退款客户
-		sql.Where("refund is NOT NULL")
-	} else if r.Type == "recycle" { // 回收站
-		sql.Where("status = 3")
+	if r.City != "" {
+		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+			return db.Where("city like ?", "%"+r.City+"%")
+		})
 	}
+
 	if r.Marshalling != "" {
-		var users []model.User
-		var userIds []uint
-		db.Select("id").Where("marshalling_id like ? AND status = 1", "%"+r.Marshalling+"%").Find(&users)
-		for _, user := range users {
-			userIds = append(userIds, user.ID)
-		}
-		sql = sql.Where("operations_staff in ?", userIds).Or("business_people in ?", userIds)
+		sql.Where("operations_staff like ?", "%"+r.Marshalling+"%").
+			Or("business_people like ?", "%"+r.Marshalling+"%")
 	}
 
 	if r.Name != "" {
-		sql.Where("name LIKE ?", "%"+r.Name+"%")
+		sql.Where("name like ?", "%"+r.Name+"%")
 	}
-
-	sql.Find(&members).Count(&count)
-	if count == 0 {
-		handle.ReturnSuccess("ok", nil, c)
-		return
+	var count int64
+	var pages int
+	if r.Limit != 0 {
+		sql = sql.Limit(r.Limit)
+	} else {
+		sql = sql.Limit(10)
 	}
-	if r.Limit == 0 {
-		r.Limit = 10
-	}
+	sql.Offset((r.Page - 1) * 10).Find(&contracts).Count(&count)
 	if int(count)%r.Limit != 0 {
 		pages = int(count)/r.Limit + 1
 	} else {
 		pages = int(count) / r.Limit
 	}
 	currPage := r.Page/r.Limit + 1
-	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": currPage}, c)
+
+	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": currPage}, c)
 }
 
 // ContractRefund 合约退款

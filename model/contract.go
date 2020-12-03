@@ -34,6 +34,7 @@ type Contract struct {
 	BusinessPeople           string  `json:"business_people"`  // 业务人员
 	Refund                   MyTime  `json:"refund"`
 	Reason                   string  `json:"reason"` // 审核备注
+	Sort                     uint8   `json:"sort"`
 	CreatedAt                MyTime  `json:"created_at"`
 	UpdatedAt                MyTime  `json:"updated_at"`
 }
