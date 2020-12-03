@@ -136,7 +136,10 @@ func MemberList(c *gin.Context) {
 		return
 	}
 	db := config.MysqlConn
-	sql := db.Where("status = ?", r.Status)
+	sql := db
+	if r.Status != -1 {
+		sql.Where("status = ?", r.Status)
+	}
 	if r.Name != "" {
 		sql = sql.Where("name like '%" + r.Name + "%'")
 	}
