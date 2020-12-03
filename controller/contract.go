@@ -415,7 +415,7 @@ func GetContractByStatus(c *gin.Context) {
 	} else {
 		page = r.Page
 	}
-	sql.Offset((page - 1) * 10).Limit(10).Find(&contracts).Count(&count)
+	sql.Limit(10).Offset((page - 1) * 10).Find(&contracts)
 	if count == 0 {
 		handle.ReturnError(http.StatusBadRequest, "暂无数据", c)
 		return
