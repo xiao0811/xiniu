@@ -377,7 +377,7 @@ func GetContractByStatus(c *gin.Context) {
 				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
 			})
 		} else {
-			sql.Where("status = 1").Where("expire_time < ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
+			sql.Where("status = 1").Where("expire_time < ?", time.Now().Add(time.Hour*24*30).Format("2006-01-02"))
 		}
 	} else if r.Type == "renewal" { // 续约客户
 		if r.Date != "" {
