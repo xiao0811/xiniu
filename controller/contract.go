@@ -425,9 +425,8 @@ func GetContractByStatus(c *gin.Context) {
 	} else {
 		pages = int(count) / 10
 	}
-	currPage := r.Page/10 + 1
 
-	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": currPage}, c)
+	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": page}, c)
 }
 
 // ContractRefund 合约退款
