@@ -409,7 +409,7 @@ func GetContractByStatus(c *gin.Context) {
 	var pages int
 	var page int
 	_count := sql
-	_count.Find(&contracts).Count(&count)
+	_count.Find(&contracts).Order("id desc").Count(&count)
 	if r.Page == 0 {
 		page = 1
 	} else {
