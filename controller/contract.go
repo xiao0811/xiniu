@@ -374,7 +374,6 @@ func GetContractByStatus(c *gin.Context) {
 	switch r.Type {
 	case "newly": // 新签客户
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
-		fmt.Println(start, end)
 		// select * from contracts where cooperation_time >= "2020-11-01" and cooperation_time < "2020-11-30" and sort = 0;
 	case "inserve": // 服务中客户
 		sql.Where("expire_time > ?", end)
@@ -408,18 +407,19 @@ func GetContractByStatus(c *gin.Context) {
 	}
 	var count int64
 	var pages int
-	if r.Limit != 0 {
-		sql = sql.Limit(r.Limit)
-	} else {
-		sql = sql.Limit(10)
+
+	sql.Offset((r.Page - 1) * 10).Limit(10).Find(&contracts).Count(&count)
+	fmt.Println(count)
+	if count == 0 {
+		handle.ReturnError(http.StatusBadRequest, "暂无数据", c)
+		return
 	}
-	sql.Offset((r.Page - 1) * 10).Find(&contracts).Count(&count)
-	if int(count)%r.Limit != 0 {
-		pages = int(count)/r.Limit + 1
+	if int(count)%10 != 0 {
+		pages = int(count)/10 + 1
 	} else {
-		pages = int(count) / r.Limit
+		pages = int(count) / 10
 	}
-	currPage := r.Page/r.Limit + 1
+	currPage := r.Page/10 + 1
 
 	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": currPage}, c)
 }
