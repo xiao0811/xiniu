@@ -2,11 +2,13 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/handle"
 	"github.com/xiao0811/xiniu/model"
+	"gorm.io/gorm"
 )
 
 // CreateRefund 创建一个申请退款
@@ -56,16 +58,34 @@ func ReviewRefund(c *gin.Context) {
 	}
 	db := config.MysqlConn
 	var refund model.Refund
+	var contract model.Contract
+	var member model.Member
 	if err := db.Where("id = ?", r.ID).First(&refund).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "退款申请不存在", c)
 		return
 	}
+	db.Where("id = ?", refund.ContractID).First(&contract)
+	db.Where("id = ?", contract.MemberID).First(&member)
 	refund.Status = r.Status
 	refund.Reason = r.Reason
-	if err := db.Save(&refund).Error; err != nil {
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := db.Save(&refund).Error; err != nil {
+			return err
+		}
+
+		member.Refund = model.MyTime{Time: time.Now()}
+		if err := db.Save(&member).Error; err != nil {
+			return err
+		}
+		// 返回 nil 提交事务
+		return nil
+	})
+	if err != nil {
 		handle.ReturnError(http.StatusBadRequest, "审核失败", c)
 		return
 	}
+
 	handle.ReturnSuccess("ok", refund, c)
 }
 

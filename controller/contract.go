@@ -105,6 +105,7 @@ func CreateContract(c *gin.Context) {
 		}
 		member.ExpireTime = model.MyTime{Time: _DelayTime}
 		member.NumberOfContracts++
+		member.Refund = model.MyTime{}
 		if err := db.Save(&member).Error; err != nil {
 			return err
 		}
