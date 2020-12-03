@@ -342,6 +342,7 @@ func GetContractByStatus(c *gin.Context) {
 		Page        int    `json:"page"`
 		Limit       int    `json:"limit"`
 		Name        string `json:"name"`
+		City        string `json:"city"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -352,6 +353,10 @@ func GetContractByStatus(c *gin.Context) {
 	var count int64
 	var pages int
 	sql := db.Preload("Contracts")
+	if r.City != "" {
+		sql.Where("city like ?", "%"+r.City+"%")
+	}
+
 	if r.Type == "newly" { // 新签客户
 		// db.Preload("Contracts", func(db *gorm.DB) *gorm.DB {
 		// 	return db.Order("created_at DESC").Limit(1)
