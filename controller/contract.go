@@ -352,7 +352,7 @@ func GetContractByStatus(c *gin.Context) {
 	db := config.MysqlConn
 	var count int64
 	var pages int
-	sql := db.Preload("Contracts")
+	sql := db.Preload("Contracts").Where("status = 1")
 	if r.City != "" {
 		sql.Where("city like ?", "%"+r.City+"%")
 	}
@@ -374,7 +374,7 @@ func GetContractByStatus(c *gin.Context) {
 				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
 			})
 		} else {
-			sql.Where("status = 1").Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
+			sql.Where("expire_time > ?", time.Now().Add(-1*time.Hour*24*30).Format("2006-01-02"))
 		}
 	} else if r.Type == "beexpire" { // 即将断约
 		if r.Date != "" {
@@ -382,7 +382,7 @@ func GetContractByStatus(c *gin.Context) {
 				return db.Where("delay_time > ? AND delay_time < ?", r.Date+"-01", r.Date+"-31").Limit(1)
 			})
 		} else {
-			sql.Where("status = 1").Where("expire_time < ?", time.Now().Add(time.Hour*24*30).Format("2006-01-02"))
+			sql.Where("expire_time < ?", time.Now().Add(time.Hour*24*30).Format("2006-01-02"))
 		}
 	} else if r.Type == "renewal" { // 续约客户
 		if r.Date != "" {
