@@ -338,7 +338,7 @@ func GetContractByStatus(c *gin.Context) {
 	var r struct {
 		Type        string `json:"type" binding:"required"`
 		Date        string `json:"date"`
-		Marshalling uint8  `json:"marshalling"`
+		Marshalling string `json:"marshalling"`
 		Page        int    `json:"page"`
 		Limit       int    `json:"limit"`
 		Name        string `json:"name"`
@@ -403,10 +403,10 @@ func GetContractByStatus(c *gin.Context) {
 	} else if r.Type == "recycle" { // 回收站
 		sql.Where("status = 3")
 	}
-	if r.Marshalling != 0 {
+	if r.Marshalling != "" {
 		var users []model.User
 		var userIds []uint
-		db.Select("id").Where("marshalling_id = ? AND status = 1", r.Marshalling).Find(&users)
+		db.Select("id").Where("marshalling_id like ? AND status = 1", "%"+r.Marshalling+"%").Find(&users)
 		for _, user := range users {
 			userIds = append(userIds, user.ID)
 		}
