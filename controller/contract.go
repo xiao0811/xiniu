@@ -378,7 +378,7 @@ func GetContractByStatus(c *gin.Context) {
 	case "newly": // 新签客户
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
 	case "inserve": // 服务中客户
-		sql.Where("delay_time >= ?", end).Where("refund IS NULL")
+		sql.Where("delay_time >= ? ADN cooperation_time <= ?", time.Now(), time.Now()).Where("refund IS NULL")
 	case "beexpire": // 即将断约
 		sql.Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
 	case "renewal": // 续约客户
