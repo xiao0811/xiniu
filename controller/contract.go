@@ -376,20 +376,20 @@ func GetContractByStatus(c *gin.Context) {
 
 	switch r.Type {
 	case "newly": // 新签客户
-		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0").Where("refund IS NULL")
 	case "inserve": // 服务中客户
-		sql.Where("delay_time >= ?", end)
+		sql.Where("delay_time >= ?", end).Where("refund IS NULL")
 	case "beexpire": // 即将断约
-		sql.Where("delay_time >= ? AND delay_time < ?", start, end)
+		sql.Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
 	case "renewal": // 续约客户
-		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0").Where("refund IS NULL")
 	case "break": // 断约客户
 		if r.Date == time.Now().Format("2006-01") || r.Date == "" {
 			end = time.Now()
 		}
 		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
 			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
-		}).Where("delay_time >= ? AND delay_time < ?", start, end)
+		}).Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
 	case "return": // 退款客户
 		sql.Where("refund >= ? AND refund < ?", start, end)
 	case "recycle": // 回收站
