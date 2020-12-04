@@ -389,7 +389,7 @@ func GetContractByStatus(c *gin.Context) {
 		}
 		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
 			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
-		}).Where("expire_time >= ? AND expire_time < ?", start, end)
+		}).Where("cooperation_time >= ? AND cooperation_time < ?", start, end)
 	case "return": // 退款客户
 		sql.Where("refund >= ? AND refund < ?", start, end)
 	case "recycle": // 回收站
