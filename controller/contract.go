@@ -363,7 +363,7 @@ func GetContractByStatus(c *gin.Context) {
 	}
 	db := config.MysqlConn
 	var contracts []model.Contract
-	sql := db.Preload("Member")
+	sql := db.Preload("Member").Where("status = 1")
 	var date string
 	if r.Date != "" {
 		date = r.Date

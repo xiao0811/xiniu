@@ -112,5 +112,9 @@ func GetRouter() *gin.Engine {
 	{
 		sms.POST("send_message", controller.SendMessage)
 	}
+	home := token.Group("/home")
+	{
+		home.POST("/count_data", controller.CountData)
+	}
 	return app
 }
