@@ -71,8 +71,11 @@ func CreateContract(c *gin.Context) {
 	}
 	// 查看用户sort
 	var _sort model.Contract
-	db.Where("id = ?", r.MemberID).Order("created_at desc").First(&_sort)
-	sort := _sort.Sort + 1
+	var sort uint8
+	if err := db.Where("id = ?", r.MemberID).Order("created_at desc").First(&_sort).Error; err != nil {
+		sort = 0
+	}
+	sort = _sort.Sort + 1
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
@@ -381,6 +384,9 @@ func GetContractByStatus(c *gin.Context) {
 	case "renewal": // 续约客户
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
 	case "break": // 断约客户
+		if r.Date == time.Now().Format("2006-01") {
+			end = time.Now()
+		}
 		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
 			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
 		})
