@@ -68,9 +68,14 @@ func ReviewRefund(c *gin.Context) {
 	db.Where("id = ?", contract.MemberID).First(&member)
 	refund.Status = r.Status
 	refund.Reason = r.Reason
+	contract.Refund = model.MyTime{Time: time.Now()}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := db.Save(&refund).Error; err != nil {
+			return err
+		}
+
+		if err := db.Save(&contract).Error; err != nil {
 			return err
 		}
 
