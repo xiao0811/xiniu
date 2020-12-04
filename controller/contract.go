@@ -377,7 +377,7 @@ func GetContractByStatus(c *gin.Context) {
 	case "inserve": // 服务中客户
 		sql.Where("expire_time >= ?", end)
 	case "beexpire": // 即将断约
-		sql.Where("expire_time > ?", end.AddDate(0, -1, 0))
+		sql.Where("expire_time >= ? AND cooperation_time < ?", start, end)
 	case "renewal": // 续约客户
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
 	case "break": // 断约客户
@@ -416,10 +416,7 @@ func GetContractByStatus(c *gin.Context) {
 		page = r.Page
 	}
 	sql.Limit(10).Offset((page - 1) * 10).Find(&contracts)
-	if count == 0 {
-		handle.ReturnError(http.StatusBadRequest, "暂无数据", c)
-		return
-	}
+
 	if int(count)%10 != 0 {
 		pages = int(count)/10 + 1
 	} else {
