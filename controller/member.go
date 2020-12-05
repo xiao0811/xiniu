@@ -165,12 +165,12 @@ func MemberList(c *gin.Context) {
 
 	sql := db
 	if user.Duty == 2 { // 运营
-		sql.Where("operations_staff IN ?", names)
+		sql = sql.Where("operations_staff IN ?", names)
 	} else if user.Duty == 3 { // 业务
-		sql.Where("business_people IN ?", names)
+		sql = sql.Where("business_people IN ?", names)
 	}
 	if r.Status != -1 {
-		sql.Where("status = ?", r.Status)
+		sql = sql.Where("status = ?", r.Status)
 	}
 	if r.Name != "" {
 		sql = sql.Where("name like '%" + r.Name + "%'")
