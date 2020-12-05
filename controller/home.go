@@ -28,6 +28,7 @@ func CountData(c *gin.Context) {
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
+	var userID []uint
 	if user.Duty == 1 || user.Role == 1 {
 		db.Where("duty = 2 AND status = 1").Find(&users)
 	} else if user.Role == 2 {
@@ -37,19 +38,9 @@ func CountData(c *gin.Context) {
 	}
 	for _, u := range users {
 		names = append(names, u.RealName)
+		userID = append(userID, u.ID)
 	}
-	// var contracts []model.Contract
-	// db.Where("status = 1").Where("operations_staff in ?", names).Find(&contracts)
-	var thisMonthNewly int64
-	var lastMonthNewly int64
-	var thisMonthRenewal int64
-	var lastMonthRenewal int64
-	var thisMonthBreak int64
-	var lastMonthBreak int64
-	var thisMonthRefund int64
-	var lastMonthRefund int64
-	var thisMonthClient int64
-	var lastMonthClient int64
+
 	var thisMonthStart time.Time
 	// 查询月开始时间
 	if r.Date != "" {
@@ -62,43 +53,26 @@ func CountData(c *gin.Context) {
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
 
-	var contracts []model.Contract
-	sql := db.Where("status = 1").Where("operations_staff IN ?", names)
+	// 新签
+	thisMonthNewly := getNewly(thisMonthStart, thisMonthEnd, names)
+	lastMonthNewly := getNewly(lastMonthStart, lastMonthEnd, names)
 
-	var _thisMonthNewly = sql
-	var _lastMonthNewly = sql
-	var _thisMonthRenewal = sql
-	var _lastMonthRenewal = sql
-	var _thisMonthBreak = sql
-	var _lastMonthBreak = sql
-	var _thisMonthRefund = sql
-	var _lastMonthRefund = sql
-	// 新增
-	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort = 0").Find(&contracts).Count(&thisMonthNewly)
-	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort = 0").Find(&contracts).Count(&lastMonthNewly)
-
-	// 续签
-	_thisMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Find(&contracts).Count(&thisMonthRenewal)
-	_lastMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Find(&contracts).Count(&lastMonthRenewal)
+	// 续约
+	thisMonthRenewal := getRenewal(thisMonthStart, thisMonthEnd, names)
+	lastMonthRenewal := getNewly(lastMonthStart, lastMonthEnd, names)
 
 	// 断约
-	_thisMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
-		return db.Where("expire_time >= ? AND expire_time < ?", thisMonthStart, thisMonthEnd)
-	}).Where("delay_time >= ? AND delay_time < ?", thisMonthStart, thisMonthEnd).Where("refund IS NULL").Find(&contracts).Count(&thisMonthBreak)
-	_lastMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
-		return db.Where("expire_time >= ? AND expire_time < ?", lastMonthStart, lastMonthEnd)
-	}).Where("delay_time >= ? AND delay_time < ?", lastMonthStart, lastMonthEnd).Where("refund IS NULL").Find(&contracts).Count(&lastMonthBreak)
+	thisMonthBreak := getBreak(thisMonthStart, thisMonthEnd, names)
+	lastMonthBreak := getBreak(lastMonthStart, lastMonthEnd, names)
 
 	// 退款
-	_thisMonthRefund.Where("refund >= ? AND refund < ?", thisMonthStart, thisMonthEnd).Find(&contracts).Count(&thisMonthRefund)
-	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Find(&contracts).Count(&lastMonthRefund)
+	thisMonthRefund := getRefund(thisMonthStart, thisMonthEnd, names)
+	lastMonthRefund := getRefund(lastMonthStart, lastMonthEnd, names)
 
-	// 总服务数
-	// _thisMonthClient.Where("delay_time < ?", thisMonthEnd).Count(&thisMonthClient)
-	// _lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
-	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, thisMonthEnd).Find(&contracts).Count(&thisMonthClient)
-	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, lastMonthEnd).Find(&contracts).Count(&lastMonthClient)
-	// handle.ReturnSuccess("ok", contracts, c)
+	// 总客户数
+	thisMonthClient := getClint(thisMonthEnd, userID)
+	lastMonthClient := getClint(lastMonthEnd, userID)
+
 	handle.ReturnSuccess("ok", gin.H{
 		"newly":   gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
 		"renewal": gin.H{"this_month": thisMonthRenewal, "last_month": lastMonthRenewal},
@@ -142,4 +116,50 @@ func ServiceDays30(c *gin.Context) {
 		Where("status = 1 AND operations_staff = ?", token.FullName).
 		Where("delay_time >= ?", end).Count(&count)
 	handle.ReturnSuccess("ok", count, c)
+}
+
+// getNewly 获取新签
+func getNewly(start, end time.Time, names []string) int {
+	db := config.MysqlConn
+	var contracts []model.Contract
+	db.Where("status = 1").Where("operations_staff IN ?", names).
+		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
+		Where("sort = 0").Find(&contracts)
+	return len(contracts)
+}
+
+// getRenewal 获取续约
+func getRenewal(start, end time.Time, names []string) int {
+	db := config.MysqlConn
+	var contracts []model.Contract
+	db.Where("status = 1").Where("operations_staff IN ?", names).
+		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
+		Where("sort > 0").Find(&contracts)
+	return len(contracts)
+}
+
+// getBreak 获取断约
+func getBreak(start, end time.Time, names []string) int {
+	db := config.MysqlConn
+	var contracts []model.Contract
+	db.Where("status = 1").Where("operations_staff IN ?", names).Preload("Member", func(db *gorm.DB) *gorm.DB {
+		return db.Where("expire_time >= ? AND expire_time < ?", start, end)
+	}).Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL").Find(&contracts)
+	return len(contracts)
+}
+
+// getRefund 获取退款
+func getRefund(start, end time.Time, names []string) int {
+	db := config.MysqlConn
+	var contracts []model.Contract
+	db.Where("status = 1").Where("operations_staff IN ?", names).
+		Where("refund >= ? AND refund < ?", start, end).Find(&contracts)
+	return len(contracts)
+}
+
+func getClint(end time.Time, names []uint) int {
+	db := config.MysqlConn
+	var members []model.Member
+	db.Model(model.Member{}).Where("operations_staff in ? AND created_at <= ?", names, end).Find(&members)
+	return len(members)
 }
