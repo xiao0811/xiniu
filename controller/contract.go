@@ -430,9 +430,9 @@ func GetContractByStatus(c *gin.Context) {
 	sql := db.Preload("Member").Where("status = 1")
 
 	if user.Duty == 2 { // 运营
-		sql.Where("operations_staff IN ?", names)
+		sql = sql.Where("operations_staff IN ?", names)
 	} else if user.Duty == 3 { // 业务
-		sql.Where("business_people IN ?", names)
+		sql = sql.Where("business_people IN ?", names)
 	}
 	var date string
 	if r.Date != "" {
