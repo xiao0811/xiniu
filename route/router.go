@@ -115,6 +115,7 @@ func GetRouter() *gin.Engine {
 	home := token.Group("/home")
 	{
 		home.POST("/count_data", controller.CountData)
+		home.POST("/my_contract", controller.MyContract)
 	}
 	return app
 }
