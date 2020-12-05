@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -428,7 +429,7 @@ func GetContractByStatus(c *gin.Context) {
 
 	var contracts []model.Contract
 	sql := db.Preload("Member").Where("status = 1")
-
+	log.Println(names, userID)
 	if user.Duty == 2 { // 运营
 		sql = sql.Where("operations_staff IN ?", names)
 	} else if user.Duty == 3 { // 业务
