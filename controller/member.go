@@ -165,9 +165,9 @@ func MemberList(c *gin.Context) {
 
 	sql := db
 	if user.Duty == 2 { // 运营
-		sql = sql.Where("operations_staff IN ?", names)
+		sql = sql.Where("operations_staff IN ?", userID)
 	} else if user.Duty == 3 { // 业务
-		sql = sql.Where("business_people IN ?", names)
+		sql = sql.Where("business_people IN ?", userID)
 	}
 	if r.Status != -1 {
 		sql = sql.Where("status = ?", r.Status)
