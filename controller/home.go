@@ -42,8 +42,8 @@ func CountData(c *gin.Context) {
 	// db.Where("status = 1").Where("operations_staff in ?", names).Find(&contracts)
 	var thisMonthNewly int64
 	var lastMonthNewly int64
-	var thisMonthBeexpire int64
-	var lastMonthBeexpire int64
+	var thisMonthRenewal int64
+	var lastMonthRenewal int64
 	var thisMonthBreak int64
 	var lastMonthBreak int64
 	var thisMonthRefund int64
@@ -66,8 +66,8 @@ func CountData(c *gin.Context) {
 
 	var _thisMonthNewly = sql
 	var _lastMonthNewly = sql
-	var _thisMonthBeexpire = sql
-	var _lastMonthBeexpire = sql
+	var _thisMonthRenewal = sql
+	var _lastMonthRenewal = sql
 	var _thisMonthBreak = sql
 	var _lastMonthBreak = sql
 	var _thisMonthRefund = sql
@@ -79,8 +79,8 @@ func CountData(c *gin.Context) {
 	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthNewly)
 
 	// 续签
-	_thisMonthBeexpire.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthBeexpire)
-	_lastMonthBeexpire.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Count(&lastMonthBeexpire)
+	_thisMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthRenewal)
+	_lastMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Count(&lastMonthRenewal)
 
 	// 断约
 	_thisMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
@@ -99,11 +99,11 @@ func CountData(c *gin.Context) {
 	_lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
 	// handle.ReturnSuccess("ok", contracts, c)
 	handle.ReturnSuccess("ok", gin.H{
-		"newly":    gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
-		"beexpire": gin.H{"this_month": thisMonthBeexpire, "last_month": lastMonthBeexpire},
-		"break":    gin.H{"this_month": thisMonthBreak, "last_month": lastMonthBreak},
-		"refund":   gin.H{"this_month": thisMonthRefund, "last_month": lastMonthRefund},
-		"client":   gin.H{"this_month": thisMonthClient, "last_month": lastMonthClient},
+		"newly":   gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
+		"renewal": gin.H{"this_month": thisMonthRenewal, "last_month": lastMonthRenewal},
+		"break":   gin.H{"this_month": thisMonthBreak, "last_month": lastMonthBreak},
+		"refund":  gin.H{"this_month": thisMonthRefund, "last_month": lastMonthRefund},
+		"client":  gin.H{"this_month": thisMonthClient, "last_month": lastMonthClient},
 	}, c)
 }
 
