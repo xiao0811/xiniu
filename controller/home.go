@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -62,8 +61,9 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-	fmt.Println(names)
-	sql := db.Model(&model.Contract{}).Where("status = 1").Where("operations_staff IN ?", names)
+
+	var contracts []model.Contract
+	sql := db.Where("status = 1").Where("operations_staff IN ?", names)
 
 	var _thisMonthNewly = sql
 	var _lastMonthNewly = sql
@@ -74,30 +74,30 @@ func CountData(c *gin.Context) {
 	var _thisMonthRefund = sql
 	var _lastMonthRefund = sql
 	// 新增
-	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort = 0").Count(&thisMonthNewly)
-	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort = 0").Count(&lastMonthNewly)
+	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort = 0").Find(&contracts).Count(&thisMonthNewly)
+	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort = 0").Find(&contracts).Count(&lastMonthNewly)
 
 	// 续签
-	_thisMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthRenewal)
-	_lastMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Count(&lastMonthRenewal)
+	_thisMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Find(&contracts).Count(&thisMonthRenewal)
+	_lastMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Find(&contracts).Count(&lastMonthRenewal)
 
 	// 断约
 	_thisMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
 		return db.Where("expire_time >= ? AND expire_time < ?", thisMonthStart, thisMonthEnd)
-	}).Where("delay_time >= ? AND delay_time < ?", thisMonthStart, thisMonthEnd).Where("refund IS NULL").Count(&thisMonthBreak)
+	}).Where("delay_time >= ? AND delay_time < ?", thisMonthStart, thisMonthEnd).Where("refund IS NULL").Find(&contracts).Count(&thisMonthBreak)
 	_lastMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
 		return db.Where("expire_time >= ? AND expire_time < ?", lastMonthStart, lastMonthEnd)
-	}).Where("delay_time >= ? AND delay_time < ?", lastMonthStart, lastMonthEnd).Where("refund IS NULL").Count(&lastMonthBreak)
+	}).Where("delay_time >= ? AND delay_time < ?", lastMonthStart, lastMonthEnd).Where("refund IS NULL").Find(&contracts).Count(&lastMonthBreak)
 
 	// 退款
-	_thisMonthRefund.Where("refund >= ? AND refund < ?", thisMonthStart, thisMonthEnd).Count(&thisMonthRefund)
-	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthRefund)
+	_thisMonthRefund.Where("refund >= ? AND refund < ?", thisMonthStart, thisMonthEnd).Find(&contracts).Count(&thisMonthRefund)
+	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Find(&contracts).Count(&lastMonthRefund)
 
 	// 总服务数
 	// _thisMonthClient.Where("delay_time < ?", thisMonthEnd).Count(&thisMonthClient)
 	// _lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
-	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, thisMonthEnd).Count(&thisMonthClient)
-	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, lastMonthEnd).Count(&lastMonthClient)
+	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, thisMonthEnd).Find(&contracts).Count(&thisMonthClient)
+	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, lastMonthEnd).Find(&contracts).Count(&lastMonthClient)
 	// handle.ReturnSuccess("ok", contracts, c)
 	handle.ReturnSuccess("ok", gin.H{
 		"newly":   gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
