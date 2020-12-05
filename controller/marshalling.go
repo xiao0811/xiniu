@@ -100,10 +100,19 @@ func MarshallingList(c *gin.Context) {
 	}
 	var marshallings []model.Marshalling
 	db := config.MysqlConn
+
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db.Where("id = ?", token.UserID).First(&user)
+
 	sql := db.Where("status = 1")
-	if r.Type != 0 {
+	if user.Role == 1 {
 		sql = sql.Where("type = ?", r.Type)
+	} else if user.Role == 2 {
+		sql = sql.Where("id = ?", user.MarshallingID)
 	}
+
 	sql.Find(&marshallings)
 	handle.ReturnSuccess("ok", marshallings, c)
 }
