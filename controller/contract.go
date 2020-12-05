@@ -171,7 +171,7 @@ func ContractList(c *gin.Context) {
 	}
 
 	if user.Role > 1 {
-		_sql.Where("marshalling_id = ?", user.Role)
+		_sql.Where("marshalling_id = ?", user.MarshallingID)
 	}
 
 	if user.Role > 2 {
@@ -413,7 +413,7 @@ func GetContractByStatus(c *gin.Context) {
 	}
 
 	if user.Role > 1 {
-		_sql.Where("marshalling_id = ?", user.Role)
+		_sql.Where("marshalling_id = ?", user.MarshallingID)
 	}
 
 	if user.Role > 2 {
