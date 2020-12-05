@@ -223,6 +223,7 @@ func ContractReview(c *gin.Context) {
 		ID     int    `json:"id" binding:"required"`
 		Status int8   `json:"status" binding:"required"`
 		Remark string `json:"remark"`
+		Reason string `json:"reason"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -240,6 +241,7 @@ func ContractReview(c *gin.Context) {
 		return
 	}
 	co.Status = r.Status
+	co.Reason = r.Reason
 	if err := db.Save(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "审核失败", c)
 		return
