@@ -157,10 +157,42 @@ func ContractList(c *gin.Context) {
 		return
 	}
 	db := config.MysqlConn
+
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db.Where("id = ?", token.UserID).First(&user)
+	var users []model.User
+	var names []string
+	var userID []uint
+	_sql := db.Where("status = 1")
+	if user.Duty > 1 {
+		_sql.Where("duty = ?", user.Duty)
+	}
+
+	if user.Role > 1 {
+		_sql.Where("marshalling_id = ?", user.Role)
+	}
+
+	if user.Role > 2 {
+		_sql.Where("id = ?", user.ID)
+	}
+	_sql.Find(&users)
+
+	for _, u := range users {
+		names = append(names, u.RealName)
+		userID = append(userID, u.ID)
+	}
+
 	var contracts []model.Contract
 	var count int64
 	var pages int
 	sql := db.Preload("Member")
+	if user.Duty == 2 { // 运营
+		sql.Where("operations_staff IN ?", names)
+	} else if user.Duty == 3 { // 业务
+		sql.Where("business_people IN ?", names)
+	}
 	if r.UUID != "" {
 		sql = sql.Where("uuid = ?", r.UUID)
 	}

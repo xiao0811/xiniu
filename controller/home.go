@@ -4,12 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/gin-gonic/gin"
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/handle"
 	"github.com/xiao0811/xiniu/model"
+	"gorm.io/gorm"
 )
 
 // CountData 首页统计数据
