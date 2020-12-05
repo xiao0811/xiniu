@@ -137,7 +137,7 @@ func getRenewal(start, end time.Time, names []string) int {
 func getBreak(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
-	if end.Format("2006-01") == time.Now().Format("2006-01") {
+	if start.Format("2006-01") == time.Now().Format("2006-01") {
 		end = time.Now()
 	}
 	db.Where("status = 1").Where("operations_staff IN ?", names).
