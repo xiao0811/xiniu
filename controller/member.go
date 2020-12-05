@@ -169,7 +169,7 @@ func MemberList(c *gin.Context) {
 	} else {
 		pages = int(count) / 10
 	}
-	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": pages}, c)
+	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": page}, c)
 }
 
 // MemberReview 客户审核

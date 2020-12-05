@@ -238,7 +238,7 @@ func UserList(c *gin.Context) {
 	} else {
 		pages = int(count) / 10
 	}
-	handle.ReturnSuccess("ok", gin.H{"user": users, "pages": pages, "currPage": pages}, c)
+	handle.ReturnSuccess("ok", gin.H{"user": users, "pages": pages, "currPage": page}, c)
 }
 
 // DeleteUser 删除用户

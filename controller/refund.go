@@ -128,7 +128,7 @@ func GetRefundList(c *gin.Context) {
 	} else {
 		pages = int(count) / 10
 	}
-	handle.ReturnSuccess("ok", gin.H{"refunds": refunds, "pages": pages, "currPage": pages}, c)
+	handle.ReturnSuccess("ok", gin.H{"refunds": refunds, "pages": pages, "currPage": page}, c)
 }
 
 // GetRefundDetails 获取退款详情

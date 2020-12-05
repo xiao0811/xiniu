@@ -185,7 +185,7 @@ func ContractList(c *gin.Context) {
 	} else {
 		pages = int(count) / 10
 	}
-	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": pages}, c)
+	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": page}, c)
 }
 
 // UpdateContract 更新合约
