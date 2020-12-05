@@ -136,6 +136,7 @@ func MemberList(c *gin.Context) {
 		return
 	}
 	db := config.MysqlConn
+	sql := db
 
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
@@ -163,12 +164,11 @@ func MemberList(c *gin.Context) {
 		userID = append(userID, u.ID)
 	}
 
-	sql := db
-	if user.Duty == 2 { // 运营
-		sql = sql.Where("operations_staff IN ?", userID)
-	} else if user.Duty == 3 { // 业务
-		sql = sql.Where("business_people IN ?", userID)
-	}
+	// if user.Duty == 2 { // 运营
+	// 	sql = sql.Where("operations_staff IN ?", userID)
+	// } else if user.Duty == 3 { // 业务
+	// 	sql = sql.Where("business_people IN ?", userID)
+	// }
 	if r.Status != -1 {
 		sql = sql.Where("status = ?", r.Status)
 	}
