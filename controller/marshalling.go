@@ -108,7 +108,11 @@ func MarshallingList(c *gin.Context) {
 
 	sql := db.Where("status = 1")
 	if user.Role == 1 {
-		sql = sql.Where("type = ?", r.Type)
+		if user.Duty == 1 {
+
+		} else {
+			sql = sql.Where("type = ?", r.Type)
+		}
 	} else if user.Role == 2 {
 		sql = sql.Where("id = ?", user.MarshallingID)
 	}
