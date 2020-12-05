@@ -53,32 +53,27 @@ func CountData(c *gin.Context) {
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
 
-	// 新签
-	thisMonthNewly := getNewly(thisMonthStart, thisMonthEnd, names)
-	lastMonthNewly := getNewly(lastMonthStart, lastMonthEnd, names)
-
-	// 续约
-	thisMonthRenewal := getRenewal(thisMonthStart, thisMonthEnd, names)
-	lastMonthRenewal := getNewly(lastMonthStart, lastMonthEnd, names)
-
-	// 断约
-	thisMonthBreak := getBreak(thisMonthStart, thisMonthEnd, names)
-	lastMonthBreak := getBreak(lastMonthStart, lastMonthEnd, names)
-
-	// 退款
-	thisMonthRefund := getRefund(thisMonthStart, thisMonthEnd, names)
-	lastMonthRefund := getRefund(lastMonthStart, lastMonthEnd, names)
-
-	// 总客户数
-	thisMonthClient := getClint(thisMonthEnd, userID)
-	lastMonthClient := getClint(lastMonthEnd, userID)
-
 	handle.ReturnSuccess("ok", gin.H{
-		"newly":   gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
-		"renewal": gin.H{"this_month": thisMonthRenewal, "last_month": lastMonthRenewal},
-		"break":   gin.H{"this_month": thisMonthBreak, "last_month": lastMonthBreak},
-		"refund":  gin.H{"this_month": thisMonthRefund, "last_month": lastMonthRefund},
-		"client":  gin.H{"this_month": thisMonthClient, "last_month": lastMonthClient},
+		"newly": gin.H{
+			"this_month": getNewly(thisMonthStart, thisMonthEnd, names),
+			"last_month": getNewly(lastMonthStart, lastMonthEnd, names),
+		},
+		"renewal": gin.H{
+			"this_month": getRenewal(thisMonthStart, thisMonthEnd, names),
+			"last_month": getNewly(lastMonthStart, lastMonthEnd, names),
+		},
+		"break": gin.H{
+			"this_month": getBreak(thisMonthStart, thisMonthEnd, names),
+			"last_month": getBreak(lastMonthStart, lastMonthEnd, names),
+		},
+		"refund": gin.H{
+			"this_month": getRefund(thisMonthStart, thisMonthEnd, names),
+			"last_month": getRefund(lastMonthStart, lastMonthEnd, names),
+		},
+		"client": gin.H{
+			"this_month": getClint(thisMonthEnd, userID),
+			"last_month": getClint(lastMonthEnd, userID),
+		},
 	}, c)
 }
 
@@ -142,9 +137,11 @@ func getRenewal(start, end time.Time, names []string) int {
 func getBreak(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
-	db.Where("status = 1").Where("operations_staff IN ?", names).Preload("Member", func(db *gorm.DB) *gorm.DB {
-		return db.Where("expire_time >= ? AND expire_time < ?", start, end)
-	}).Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL").Find(&contracts)
+	db.Where("status = 1").Where("operations_staff IN ?", names).
+		Preload("Member", func(db *gorm.DB) *gorm.DB {
+			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
+		}).Where("delay_time >= ? AND delay_time < ?", start, end).
+		Where("refund IS NULL").Find(&contracts)
 	return len(contracts)
 }
 
@@ -160,6 +157,6 @@ func getRefund(start, end time.Time, names []string) int {
 func getClint(end time.Time, names []uint) int {
 	db := config.MysqlConn
 	var members []model.Member
-	db.Model(model.Member{}).Where("operations_staff in ? AND created_at <= ?", names, end).Find(&members)
+	db.Where("operations_staff in ? AND created_at <= ?", names, end).Find(&members)
 	return len(members)
 }
