@@ -70,13 +70,8 @@ func CreateContract(c *gin.Context) {
 		member.FirstCreate = model.MyTime{Time: _CooperationTime}
 	}
 	// 查看用户sort
-	var _sort model.Contract
-	var sort uint8
-	if err := db.Where("id = ?", r.MemberID).Order("created_at desc").First(&_sort).Error; err != nil {
-		sort = 0
-	} else {
-		sort = _sort.Sort + 1
-	}
+	var sort int64
+	db.Model(&model.Contract{}).Where("id = ?", r.MemberID).Count(&sort)
 
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
