@@ -46,6 +46,10 @@ func CountData(c *gin.Context) {
 	var lastMonthBeexpire int64
 	var thisMonthBreak int64
 	var lastMonthBreak int64
+	var thisMonthRefund int64
+	var lastMonthRefund int64
+	var thisMonthClient int64
+	var lastMonthClient int64
 	var thisMonthStart time.Time
 	// 查询月开始时间
 	if r.Date != "" {
@@ -60,27 +64,46 @@ func CountData(c *gin.Context) {
 
 	sql := db.Model(&model.Contract{}).Where("sort = 0 AND status = 1").Where("operations_staff IN ?", names)
 
+	var _thisMonthNewly = sql
+	var _lastMonthNewly = sql
+	var _thisMonthBeexpire = sql
+	var _lastMonthBeexpire = sql
+	var _thisMonthBreak = sql
+	var _lastMonthBreak = sql
+	var _thisMonthRefund = sql
+	var _lastMonthRefund = sql
+	var _thisMonthClient = sql
+	var _lastMonthClient = sql
 	// 新增
-	sql.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Count(&thisMonthNewly)
-	sql.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthNewly)
+	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Count(&thisMonthNewly)
+	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthNewly)
 
 	// 续签
-	sql.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthBeexpire)
-	sql.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Count(&lastMonthBeexpire)
+	_thisMonthBeexpire.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthBeexpire)
+	_lastMonthBeexpire.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort > 0").Count(&lastMonthBeexpire)
 
 	// 断约
-	sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+	_thisMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
 		return db.Where("expire_time >= ? AND expire_time < ?", thisMonthStart, thisMonthEnd)
 	}).Where("delay_time >= ? AND delay_time < ?", thisMonthStart, thisMonthEnd).Where("refund IS NULL").Count(&thisMonthBreak)
-	sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+	_lastMonthBreak.Preload("Member", func(db *gorm.DB) *gorm.DB {
 		return db.Where("expire_time >= ? AND expire_time < ?", lastMonthStart, lastMonthEnd)
 	}).Where("delay_time >= ? AND delay_time < ?", lastMonthStart, lastMonthEnd).Where("refund IS NULL").Count(&lastMonthBreak)
 
+	// 退款
+	_thisMonthRefund.Where("refund >= ? AND refund < ?", thisMonthStart, thisMonthEnd).Count(&thisMonthRefund)
+	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthRefund)
+
+	// 总服务数
+	_thisMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&thisMonthClient)
+	_lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
 	// handle.ReturnSuccess("ok", contracts, c)
 	handle.ReturnSuccess("ok", gin.H{
 		"newly":    gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},
 		"beexpire": gin.H{"this_month": thisMonthBeexpire, "last_month": lastMonthBeexpire},
 		"break":    gin.H{"this_month": thisMonthBreak, "last_month": lastMonthBreak},
+		"refund":   gin.H{"this_month": thisMonthRefund, "last_month": lastMonthRefund},
+		"client":   gin.H{"this_month": thisMonthClient, "last_month": lastMonthClient},
 	}, c)
 }
 
@@ -92,6 +115,30 @@ func MyContract(c *gin.Context) {
 	db := config.MysqlConn
 	db.Where("id = ?", token.UserID).First(&user)
 	var contracts []model.Contract
-	db.Where("operations_staff = ?", user.RealName).Where("status = 1").Where("refund IS NULL").Find(&contracts)
+	db.Preload("ContractTask").Where("operations_staff = ?", user.RealName).
+		Where("status = 1 AND refund IS NULL").Find(&contracts)
 	handle.ReturnSuccess("ok", contracts, c)
+}
+
+// ServiceDays30 30天服务数
+func ServiceDays30(c *gin.Context) {
+	var r struct {
+		Date string `json:"date"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db := config.MysqlConn
+	db.Where("id = ?", token.UserID).First(&user)
+	end, _ := time.ParseInLocation("2006-01-02", r.Date, time.Local)
+	// start := end.AddDate(0, 0, -30)
+	var count int64
+	db.Model(&model.Contract{}).
+		Where("status = 1 AND operations_staff = ?", token.FullName).
+		Where("delay_time >= ?", end).Count(&count)
+	handle.ReturnSuccess("ok", count, c)
 }

@@ -116,6 +116,7 @@ func GetRouter() *gin.Engine {
 	{
 		home.POST("/count_data", controller.CountData)
 		home.POST("/my_contract", controller.MyContract)
+		home.POST("/30_days_service", controller.ServiceDays30)
 	}
 	return app
 }
