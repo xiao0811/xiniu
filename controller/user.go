@@ -199,11 +199,38 @@ func UserList(c *gin.Context) {
 		return
 	}
 	db := config.MysqlConn
+
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db.Where("id = ?", token.UserID).First(&user)
+	var _users []model.User
+	var names []string
+	var userID []uint
+	_sql := db.Where("status = 1")
+	if user.Duty > 1 {
+		_sql.Where("duty = ?", user.Duty)
+	}
+
+	if user.Role > 1 {
+		_sql.Where("marshalling_id = ?", user.MarshallingID)
+	}
+
+	if user.Role > 2 {
+		_sql.Where("id = ?", user.ID)
+	}
+	_sql.Find(&_users)
+
+	for _, u := range _users {
+		names = append(names, u.RealName)
+		userID = append(userID, u.ID)
+	}
+
 	var users []model.User
 	var count int64
 	var page int
 	var pages int
-	sql := db.Preload("Marshalling").Where("status = 1")
+	sql := db.Preload("Marshalling").Where("status = 1").Where("id IN ?", userID)
 	if r.RealName != "" {
 		sql = sql.Where("real_name like '%" + r.RealName + "%'")
 	}
