@@ -71,7 +71,13 @@ func CreateContract(c *gin.Context) {
 	}
 	// 查看用户sort
 	var sort int64
-	db.Model(&model.Contract{}).Where("member_id = ?", r.MemberID).Count(&sort)
+	var _sc model.Contract
+	if err := db.Where("member_id = ?", r.MemberID).First(&_sc).Error; err != nil {
+		sort = 0
+	} else {
+		sort = _sc.Sort + 1
+	}
+
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
