@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,8 +62,8 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-
-	sql := db.Model(&model.Contract{}).Where("sort = 0 AND status = 1").Where("operations_staff IN ?", names)
+	fmt.Println(names)
+	sql := db.Model(&model.Contract{}).Where("status = 1").Where("operations_staff IN ?", names)
 
 	var _thisMonthNewly = sql
 	var _lastMonthNewly = sql
@@ -72,11 +73,9 @@ func CountData(c *gin.Context) {
 	var _lastMonthBreak = sql
 	var _thisMonthRefund = sql
 	var _lastMonthRefund = sql
-	var _thisMonthClient = sql
-	var _lastMonthClient = sql
 	// 新增
-	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Count(&thisMonthNewly)
-	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthNewly)
+	_thisMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort = 0").Count(&thisMonthNewly)
+	_lastMonthNewly.Where("cooperation_time >= ? AND cooperation_time < ?", lastMonthStart, lastMonthEnd).Where("sort = 0").Count(&lastMonthNewly)
 
 	// 续签
 	_thisMonthRenewal.Where("cooperation_time >= ? AND cooperation_time < ?", thisMonthStart, thisMonthEnd).Where("sort > 0").Count(&thisMonthRenewal)
@@ -95,8 +94,10 @@ func CountData(c *gin.Context) {
 	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthRefund)
 
 	// 总服务数
-	_thisMonthClient.Where("delay_time < ?", thisMonthEnd).Count(&thisMonthClient)
-	_lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
+	// _thisMonthClient.Where("delay_time < ?", thisMonthEnd).Count(&thisMonthClient)
+	// _lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
+	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, thisMonthEnd).Count(&thisMonthClient)
+	db.Model(model.Member{}).Where("operations_staff = ? AND created_at <= ?", user.ID, lastMonthEnd).Count(&lastMonthClient)
 	// handle.ReturnSuccess("ok", contracts, c)
 	handle.ReturnSuccess("ok", gin.H{
 		"newly":   gin.H{"this_month": thisMonthNewly, "last_month": lastMonthNewly},

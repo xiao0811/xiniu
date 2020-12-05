@@ -192,6 +192,7 @@ func UserList(c *gin.Context) {
 		Limit         int    `json:"limit"`
 		Offset        int    `json:"offset"`
 		Duty          int8   `json:"duty"`
+		Page          int    `json:"page"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -200,6 +201,8 @@ func UserList(c *gin.Context) {
 	db := config.MysqlConn
 	var users []model.User
 	var count int64
+	var page int
+	var pages int
 	sql := db.Preload("Marshalling").Where("status = 1")
 	if r.RealName != "" {
 		sql = sql.Where("real_name like '%" + r.RealName + "%'")
@@ -221,15 +224,21 @@ func UserList(c *gin.Context) {
 	} else {
 		sql = sql.Limit(10)
 	}
-	sql.Offset(r.Offset).Find(&users).Count(&count)
-	var pages int
-	if int(count)%r.Limit != 0 {
-		pages = int(count)/r.Limit + 1
+	_count := sql
+	_count.Find(&users).Order("id desc").Count(&count)
+	if r.Page == 0 {
+		page = 1
 	} else {
-		pages = int(count) / r.Limit
+		page = r.Page
 	}
-	currPage := r.Offset/r.Limit + 1
-	handle.ReturnSuccess("ok", gin.H{"user": users, "pages": pages, "currPage": currPage}, c)
+	sql.Limit(10).Offset((page - 1) * 10).Find(&users)
+
+	if int(count)%10 != 0 {
+		pages = int(count)/10 + 1
+	} else {
+		pages = int(count) / 10
+	}
+	handle.ReturnSuccess("ok", gin.H{"user": users, "pages": pages, "currPage": pages}, c)
 }
 
 // DeleteUser 删除用户

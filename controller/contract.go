@@ -170,21 +170,22 @@ func ContractList(c *gin.Context) {
 	if r.Status != -1 {
 		sql = sql.Where("status = ?", r.Status)
 	}
-	sql.Offset((r.Page - 1) * 10).Find(&contracts).Count(&count)
-	if count == 0 {
-		handle.ReturnSuccess("ok", nil, c)
-		return
-	}
-	if r.Limit == 0 {
-		r.Limit = 10
-	}
-	if int(count)%r.Limit != 0 {
-		pages = int(count)/r.Limit + 1
+	var page int
+	_count := sql
+	_count.Find(&contracts).Order("id desc").Count(&count)
+	if r.Page == 0 {
+		page = 1
 	} else {
-		pages = int(count) / r.Limit
+		page = r.Page
 	}
-	currPage := r.Page/r.Limit + 1
-	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": currPage}, c)
+	sql.Limit(10).Offset((page - 1) * 10).Find(&contracts)
+
+	if int(count)%10 != 0 {
+		pages = int(count)/10 + 1
+	} else {
+		pages = int(count) / 10
+	}
+	handle.ReturnSuccess("ok", gin.H{"contracts": contracts, "pages": pages, "currPage": pages}, c)
 }
 
 // UpdateContract 更新合约

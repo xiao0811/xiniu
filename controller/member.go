@@ -154,14 +154,22 @@ func MemberList(c *gin.Context) {
 	} else {
 		sql = sql.Limit(10)
 	}
-	sql.Offset((r.Page - 1) * 10).Find(&members).Count(&count)
-	if int(count)%r.Limit != 0 {
-		pages = int(count)/r.Limit + 1
+	var page int
+	_count := sql
+	_count.Find(&members).Order("id desc").Count(&count)
+	if r.Page == 0 {
+		page = 1
 	} else {
-		pages = int(count) / r.Limit
+		page = r.Page
 	}
-	currPage := r.Page/r.Limit + 1
-	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": currPage}, c)
+	sql.Limit(10).Offset((page - 1) * 10).Find(&members)
+
+	if int(count)%10 != 0 {
+		pages = int(count)/10 + 1
+	} else {
+		pages = int(count) / 10
+	}
+	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": pages}, c)
 }
 
 // MemberReview 客户审核
