@@ -95,7 +95,7 @@ func CountData(c *gin.Context) {
 	_lastMonthRefund.Where("refund >= ? AND refund < ?", lastMonthStart, lastMonthEnd).Count(&lastMonthRefund)
 
 	// 总服务数
-	_thisMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&thisMonthClient)
+	_thisMonthClient.Where("delay_time < ?", thisMonthStart).Count(&thisMonthClient)
 	_lastMonthClient.Where("delay_time < ?", lastMonthEnd).Count(&lastMonthClient)
 	// handle.ReturnSuccess("ok", contracts, c)
 	handle.ReturnSuccess("ok", gin.H{
