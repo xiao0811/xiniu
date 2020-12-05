@@ -74,8 +74,10 @@ func CreateContract(c *gin.Context) {
 	var sort uint8
 	if err := db.Where("id = ?", r.MemberID).Order("created_at desc").First(&_sort).Error; err != nil {
 		sort = 0
+	} else {
+		sort = _sort.Sort + 1
 	}
-	sort = _sort.Sort + 1
+
 	con := model.Contract{
 		UUID:                     "XINIU-ORD-" + time.Now().Format("200601021504") + strconv.Itoa(handle.RandInt(1000, 9999)),
 		MemberID:                 r.MemberID,
