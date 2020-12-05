@@ -554,7 +554,7 @@ func ChangeManagement(c *gin.Context) {
 		m.BusinessPeople = r.BusinessPeople
 		var businessPeople model.User
 		db.Where("id = ?", r.BusinessPeople).First(&businessPeople)
-		u.OperationsStaff = businessPeople.RealName
+		u.BusinessPeople = businessPeople.RealName
 	}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&m).Error; err != nil {
