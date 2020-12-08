@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -51,7 +52,7 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-
+	fmt.Println(thisMonthStart, thisMonthEnd, lastMonthStart, lastMonthEnd)
 	handle.ReturnSuccess("ok", gin.H{
 		"newly": gin.H{
 			"this_month": getNewly(thisMonthStart, thisMonthEnd, names),
