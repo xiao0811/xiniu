@@ -32,16 +32,20 @@ func CountData(c *gin.Context) {
 	var userID []uint
 	if user.Duty == 1 || user.Role == 1 {
 		db.Where("duty = 2 AND status = 1").Find(&users)
+		fmt.Println("do 1")
 	} else if user.Role == 2 {
 		db.Where("duty = 2 AND status = 1 AND MarshallingID = ?", user.MarshallingID).Find(&users)
+		fmt.Println("do 2")
 	} else {
 		db.Where("id = ?", user.ID).Find(&users)
+		fmt.Println("do 3")
 	}
+	fmt.Println(users)
 	for _, u := range users {
+		fmt.Println(u)
 		names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
-	fmt.Println(names)
 	var thisMonthStart time.Time
 	// 查询月开始时间
 	if r.Date != "" {
@@ -53,11 +57,6 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-	fmt.Println("thisMonthStart:", thisMonthStart)
-	fmt.Println("thisMonthEnd:", thisMonthEnd)
-	fmt.Println("lastMonthStart:", lastMonthStart)
-	fmt.Println("lastMonthEnd:", lastMonthEnd)
-	fmt.Println("names", names)
 	fmt.Println(GetNewly(thisMonthStart, thisMonthEnd, names))
 	handle.ReturnSuccess("ok", gin.H{
 		"newly": gin.H{
