@@ -25,6 +25,7 @@ func CountData(c *gin.Context) {
 	token, _ := _token.(*handle.JWTClaims)
 	var user model.User
 	db := config.MysqlConn
+	fmt.Println(token.UserID)
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
