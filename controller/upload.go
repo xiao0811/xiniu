@@ -24,11 +24,11 @@ func UploadImages(c *gin.Context) {
 		s := strings.Split(file.Filename, ".")
 		name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + "." + s[len(s)-1]
 		// 上传文件到指定的路径
-		if err := c.SaveUploadedFile(file, "/var/www/html/"+time.Now().Format("20060102")+"/"+name); err != nil {
+		if err := c.SaveUploadedFile(file, "./upload/images/"+name); err != nil {
 			log.Println(err)
 			continue
 		}
-		images = append(images, time.Now().Format("20060102")+"/"+name)
+		images = append(images, "/upload/images/"+name)
 	}
 	handle.ReturnSuccess("ok", images, c)
 }
@@ -44,16 +44,16 @@ func UploadImage(c *gin.Context) {
 	s := strings.Split(file.Filename, ".")
 	name := time.Now().Format("20060102150405") + strconv.Itoa(handle.RandInt(1000, 9999)) + "." + s[len(s)-1]
 	// 上传文件到指定的路径
-	if err := c.SaveUploadedFile(file, "/var/www/html/"+time.Now().Format("20060102")+"/"+name); err != nil {
+	if err := c.SaveUploadedFile(file, "./upload/images/"+name); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "图片上传失败", c)
 		return
 	}
-	image := time.Now().Format("20060102") + name
+	image := "/upload/images/" + name
 	handle.ReturnSuccess("ok", image, c)
 }
 
 // ShowImage 获取图片
 func ShowImage(c *gin.Context) {
-	imageName := "/var/www/html" + c.Param("images_name")
+	imageName := "./upload/images/" + c.Param("images_name")
 	c.File(imageName)
 }
