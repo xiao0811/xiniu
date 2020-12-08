@@ -52,7 +52,12 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-	fmt.Println(thisMonthStart, thisMonthEnd, lastMonthStart, lastMonthEnd)
+	fmt.Println("thisMonthStart:", thisMonthStart)
+	fmt.Println("thisMonthEnd:", thisMonthEnd)
+	fmt.Println("lastMonthStart:", lastMonthStart)
+	fmt.Println("lastMonthEnd:", lastMonthEnd)
+	fmt.Println("names", names)
+	fmt.Println(GetNewly(thisMonthStart, thisMonthEnd, names))
 	handle.ReturnSuccess("ok", gin.H{
 		"newly": gin.H{
 			"this_month": GetNewly(thisMonthStart, thisMonthEnd, names),
@@ -117,9 +122,9 @@ func ServiceDays30(c *gin.Context) {
 func GetNewly(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
-	db.Where("status = 1").Where("operations_staff IN ?", names).
+	db.Where("status = 1 AND sort = 0").Where("operations_staff IN ?", names).
 		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
-		Where("sort = 0").Find(&contracts)
+		Find(&contracts)
 	return len(contracts)
 }
 
@@ -127,9 +132,9 @@ func GetNewly(start, end time.Time, names []string) int {
 func GetRenewal(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
-	db.Where("status = 1").Where("operations_staff IN ?", names).
+	db.Where("status = 1 AND sort > 0").Where("operations_staff IN ?", names).
 		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
-		Where("sort > 0").Find(&contracts)
+		Find(&contracts)
 	return len(contracts)
 }
 
