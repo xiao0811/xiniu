@@ -22,7 +22,7 @@ func GetUserLogs(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var logs model.UserLog
 	sql := db.Where("1 = 1")
 	if r.UserID != 0 {

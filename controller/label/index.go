@@ -20,7 +20,7 @@ func Create(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	label := model.Label{Name: r.Name, Status: 1, LabelGroupID: r.LabelGroupID}
 	if err := db.Create(&label).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "标签创建失败", c)
@@ -37,7 +37,7 @@ func Update(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var label model.Label
 
 	if err := db.Where("id = ?", r.ID).First(&label).Error; err != nil {
@@ -60,7 +60,7 @@ func Delete(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var label model.Label
 
 	if err := db.Where("id = ?", r.ID).First(&label).Error; err != nil {
@@ -88,7 +88,7 @@ func Index(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var labels []model.Label
 	sql := db.Where("status = ?", r.Status)
 	if r.Group != 0 {
@@ -107,7 +107,7 @@ func Info(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var label model.Label
 	db.Where("id = ?", r.ID).First(&label)
 	handle.ReturnSuccess("ok", label, c)

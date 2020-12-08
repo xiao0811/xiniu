@@ -23,7 +23,7 @@ func CountData(c *gin.Context) {
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
 	var user model.User
-	db := config.MysqlConn
+	db := config.GetMysql()
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
@@ -79,7 +79,7 @@ func MyContract(c *gin.Context) {
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
 	var user model.User
-	db := config.MysqlConn
+	db := config.GetMysql()
 	db.Where("id = ?", token.UserID).First(&user)
 	var contracts []model.Contract
 	db.Preload("ContractTask").Where("operations_staff = ?", user.RealName).
@@ -99,7 +99,7 @@ func ServiceDays30(c *gin.Context) {
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
 	var user model.User
-	db := config.MysqlConn
+	db := config.GetMysql()
 	db.Where("id = ?", token.UserID).First(&user)
 	end, _ := time.ParseInLocation("2006-01-02", r.Date, time.Local)
 	// start := end.AddDate(0, 0, -30)
@@ -112,7 +112,7 @@ func ServiceDays30(c *gin.Context) {
 
 // GetNewly 获取新签
 func GetNewly(start, end time.Time, names []string) int {
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contracts []model.Contract
 	db.Where("status = 1 AND sort = 0").Where("operations_staff IN ?", names).
 		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
@@ -122,7 +122,7 @@ func GetNewly(start, end time.Time, names []string) int {
 
 // GetRenewal 获取续约
 func GetRenewal(start, end time.Time, names []string) int {
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contracts []model.Contract
 	db.Where("status = 1 AND sort > 0").Where("operations_staff IN ?", names).
 		Where("cooperation_time >= ? AND cooperation_time < ?", start, end).
@@ -132,7 +132,7 @@ func GetRenewal(start, end time.Time, names []string) int {
 
 // GetBreak 获取断约
 func GetBreak(start, end time.Time, names []string) int {
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contracts []model.Contract
 	if start.Format("2006-01") == time.Now().Format("2006-01") {
 		end = time.Now()
@@ -147,7 +147,7 @@ func GetBreak(start, end time.Time, names []string) int {
 
 // GetRefund 获取退款
 func GetRefund(start, end time.Time, names []string) int {
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contracts []model.Contract
 	db.Where("status = 1").Where("operations_staff IN ?", names).
 		Where("refund >= ? AND refund < ?", start, end).Find(&contracts)
@@ -156,7 +156,7 @@ func GetRefund(start, end time.Time, names []string) int {
 
 // GetClint 获取客户总数
 func GetClint(end time.Time, names []uint) int {
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var members []model.Member
 	db.Where("operations_staff in ? AND created_at <= ?", names, end).Find(&members)
 	return len(members)

@@ -21,7 +21,7 @@ func SendMessage(c *gin.Context) {
 	}
 	var contract model.Contract
 	var member model.Member
-	db := config.MysqlConn
+	db := config.GetMysql()
 	if err := db.Where("id = ?", r.ID).First(&contract).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
 		return

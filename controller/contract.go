@@ -44,7 +44,7 @@ func CreateContract(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var _c model.Contract
 	if err := db.Where("status = 1 AND DelayTime > ?", time.Now()).First(&_c).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "存在未完成的合约", c)
@@ -157,7 +157,7 @@ func ContractList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
@@ -229,7 +229,7 @@ func UpdateContract(c *gin.Context) {
 		return
 	}
 	var co model.Contract
-	db := config.MysqlConn
+	db := config.GetMysql()
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
 		return
@@ -263,7 +263,7 @@ func ContractReview(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var co model.Contract
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
@@ -308,7 +308,7 @@ func GetContractDetails(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var co model.Contract
 	db.Where("id = ?", r.ID).First(&co)
 	handle.ReturnSuccess("ok", co, c)
@@ -325,7 +325,7 @@ func ContractExtension(c *gin.Context) {
 		return
 	}
 	var co model.Contract
-	db := config.MysqlConn
+	db := config.GetMysql()
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "合约不存在", c)
 		return
@@ -354,7 +354,7 @@ func GetContractTask(c *gin.Context) {
 		return
 	}
 	fmt.Println(r.ID)
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var co model.Contract
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
@@ -370,7 +370,7 @@ func UpdateContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var co model.Contract
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不正确", c)
@@ -399,7 +399,7 @@ func GetContractByStatus(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 
 	_token, _ := c.Get("token")
 	token, _ := _token.(*handle.JWTClaims)
@@ -512,7 +512,7 @@ func ContractRefund(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contract model.Contract
 	if err := db.Where("id = ?", r.ID).First(&contract).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
@@ -537,7 +537,7 @@ func ChangeManagement(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var m model.Member
 	var u model.Contract
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {

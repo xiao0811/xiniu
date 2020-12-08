@@ -27,7 +27,7 @@ func CreateContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	_CompleteTime, err := time.ParseInLocation("2006-01-02", r.CompleteTime, time.Local)
 	if err != nil {
 		handle.ReturnError(http.StatusBadRequest, "时间格式不正确", c)
@@ -68,7 +68,7 @@ func DeleteContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var ct model.ContractTask
 	if err := db.Where("id = ?", r.ID).First(&ct).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "任务ID错误", c)
@@ -102,7 +102,7 @@ func GetContractTaskList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	sql := db
 	var cts []model.ContractTask
 	if r.Type != 0 {

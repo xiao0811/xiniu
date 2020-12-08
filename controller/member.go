@@ -42,7 +42,7 @@ func CreateMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	if err := db.Where("name = ?", r.Name).First(&m).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "门店已存在", c)
 		return
@@ -95,7 +95,7 @@ func UpdateMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确"+err.Error(), c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var m model.Member
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
@@ -135,7 +135,7 @@ func MemberList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	sql := db
 
 	_token, _ := c.Get("token")
@@ -216,7 +216,7 @@ func MemberReview(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var m model.Member
 	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
@@ -257,7 +257,7 @@ func GetMemberDetails(c *gin.Context) {
 		return
 	}
 	var member model.Member
-	db := config.MysqlConn
+	db := config.GetMysql()
 	sql := db.Where("id = ?", r.ID)
 	if err := sql.First(&member).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)

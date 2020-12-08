@@ -22,7 +22,7 @@ func CreateRefund(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var contract model.Contract
 	if err := db.Where("id = ?", r.ID).First(&contract).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "合约ID不存在", c)
@@ -56,7 +56,7 @@ func ReviewRefund(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var refund model.Refund
 	var contract model.Contract
 	var member model.Member
@@ -105,7 +105,7 @@ func GetRefundList(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.MysqlConn
+	db := config.GetMysql()
 	var refunds []model.Refund
 	var count int64
 	var pages int
@@ -141,7 +141,7 @@ func GetRefundDetails(c *gin.Context) {
 		return
 	}
 	var refund model.Refund
-	db := config.MysqlConn
+	db := config.GetMysql()
 	if err := db.Where("id = ?", r.ID).First(&refund).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "退款申请不存在", c)
 		return
