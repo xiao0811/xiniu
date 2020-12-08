@@ -41,7 +41,7 @@ func CountData(c *gin.Context) {
 		names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
-
+	fmt.Println(names)
 	var thisMonthStart time.Time
 	// 查询月开始时间
 	if r.Date != "" {
