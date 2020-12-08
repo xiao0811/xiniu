@@ -55,24 +55,24 @@ func CountData(c *gin.Context) {
 	fmt.Println(thisMonthStart, thisMonthEnd, lastMonthStart, lastMonthEnd)
 	handle.ReturnSuccess("ok", gin.H{
 		"newly": gin.H{
-			"this_month": getNewly(thisMonthStart, thisMonthEnd, names),
-			"last_month": getNewly(lastMonthStart, lastMonthEnd, names),
+			"this_month": GetNewly(thisMonthStart, thisMonthEnd, names),
+			"last_month": GetNewly(lastMonthStart, lastMonthEnd, names),
 		},
 		"renewal": gin.H{
-			"this_month": getRenewal(thisMonthStart, thisMonthEnd, names),
-			"last_month": getNewly(lastMonthStart, lastMonthEnd, names),
+			"this_month": GetRenewal(thisMonthStart, thisMonthEnd, names),
+			"last_month": GetRenewal(lastMonthStart, lastMonthEnd, names),
 		},
 		"break": gin.H{
-			"this_month": getBreak(thisMonthStart, thisMonthEnd, names),
-			"last_month": getBreak(lastMonthStart, lastMonthEnd, names),
+			"this_month": GetBreak(thisMonthStart, thisMonthEnd, names),
+			"last_month": GetBreak(lastMonthStart, lastMonthEnd, names),
 		},
 		"refund": gin.H{
-			"this_month": getRefund(thisMonthStart, thisMonthEnd, names),
-			"last_month": getRefund(lastMonthStart, lastMonthEnd, names),
+			"this_month": GetRefund(thisMonthStart, thisMonthEnd, names),
+			"last_month": GetRefund(lastMonthStart, lastMonthEnd, names),
 		},
 		"client": gin.H{
-			"this_month": getClint(thisMonthEnd, userID),
-			"last_month": getClint(lastMonthEnd, userID),
+			"this_month": GetClint(thisMonthEnd, userID),
+			"last_month": GetClint(lastMonthEnd, userID),
 		},
 	}, c)
 }
@@ -113,8 +113,8 @@ func ServiceDays30(c *gin.Context) {
 	handle.ReturnSuccess("ok", count, c)
 }
 
-// getNewly 获取新签
-func getNewly(start, end time.Time, names []string) int {
+// GetNewly 获取新签
+func GetNewly(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
 	db.Where("status = 1").Where("operations_staff IN ?", names).
@@ -123,8 +123,8 @@ func getNewly(start, end time.Time, names []string) int {
 	return len(contracts)
 }
 
-// getRenewal 获取续约
-func getRenewal(start, end time.Time, names []string) int {
+// GetRenewal 获取续约
+func GetRenewal(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
 	db.Where("status = 1").Where("operations_staff IN ?", names).
@@ -133,8 +133,8 @@ func getRenewal(start, end time.Time, names []string) int {
 	return len(contracts)
 }
 
-// getBreak 获取断约
-func getBreak(start, end time.Time, names []string) int {
+// GetBreak 获取断约
+func GetBreak(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
 	if start.Format("2006-01") == time.Now().Format("2006-01") {
@@ -148,8 +148,8 @@ func getBreak(start, end time.Time, names []string) int {
 	return len(contracts)
 }
 
-// getRefund 获取退款
-func getRefund(start, end time.Time, names []string) int {
+// GetRefund 获取退款
+func GetRefund(start, end time.Time, names []string) int {
 	db := config.MysqlConn
 	var contracts []model.Contract
 	db.Where("status = 1").Where("operations_staff IN ?", names).
@@ -157,7 +157,8 @@ func getRefund(start, end time.Time, names []string) int {
 	return len(contracts)
 }
 
-func getClint(end time.Time, names []uint) int {
+// GetClint 获取客户总数
+func GetClint(end time.Time, names []uint) int {
 	db := config.MysqlConn
 	var members []model.Member
 	db.Where("operations_staff in ? AND created_at <= ?", names, end).Find(&members)
