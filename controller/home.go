@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,24 +24,18 @@ func CountData(c *gin.Context) {
 	token, _ := _token.(*handle.JWTClaims)
 	var user model.User
 	db := config.MysqlConn
-	fmt.Println(token.UserID)
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
 	var userID []uint
 	if user.Duty == 1 || user.Role == 1 {
-		db.Where("duty = 2 AND status = 1").Find(&users)
-		fmt.Println("do 1")
+		db.Where("status = 1").Find(&users)
 	} else if user.Role == 2 {
 		db.Where("duty = 2 AND status = 1 AND MarshallingID = ?", user.MarshallingID).Find(&users)
-		fmt.Println("do 2")
 	} else {
 		db.Where("id = ?", user.ID).Find(&users)
-		fmt.Println("do 3")
 	}
-	fmt.Println(users)
 	for _, u := range users {
-		fmt.Println(u)
 		names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
@@ -57,7 +50,6 @@ func CountData(c *gin.Context) {
 	thisMonthEnd := thisMonthStart.AddDate(0, 1, 0)    // 查询月结束时间
 	lastMonthStart := thisMonthStart.AddDate(0, -1, 0) // 对比月开始时间
 	lastMonthEnd := lastMonthStart.AddDate(0, 1, 0)    // 对比月结束时间
-	fmt.Println(GetNewly(thisMonthStart, thisMonthEnd, names))
 	handle.ReturnSuccess("ok", gin.H{
 		"newly": gin.H{
 			"this_month": GetNewly(thisMonthStart, thisMonthEnd, names),
