@@ -38,3 +38,18 @@ func (t *MyTime) Scan(v interface{}) error {
 	}
 	return fmt.Errorf("can not convert %v to timestamp", v)
 }
+
+// UnmarshalJSON .
+// func (t *MyTime) UnmarshalJSON(data []byte) error {
+// 	if string(data) == "null" {
+// 		return nil
+// 	}
+// 	var err error
+// 	//前端接收的时间字符串
+// 	str := string(data)
+// 	//去除接收的str收尾多余的"
+// 	timeStr := strings.Trim(str, "\"")
+// 	t1, err := time.ParseInLocation(TimeFormat, timeStr, time.Local)
+// 	*t = MyTime{t1}
+// 	return err
+// }

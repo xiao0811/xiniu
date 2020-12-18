@@ -16,7 +16,7 @@ func GetRouter() *gin.Engine {
 	}
 
 	app := gin.Default()
-
+	app.Use(middleware.Cors())
 	// 用户登录
 	app.POST("/login", controller.Login)
 	// 发送修改密码短信
