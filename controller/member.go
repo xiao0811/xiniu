@@ -97,7 +97,7 @@ func UpdateMember(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var m model.Member
-	if err := db.Where("id = ?", r.ID).First(&m).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
 		return
 	}

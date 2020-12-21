@@ -98,11 +98,11 @@ func UpdateUser(c *gin.Context) {
 
 	var user model.User
 	db := config.GetMysql()
-	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户未找到", c)
 		return
 	}
-	if err := db.Model(&user).Updates(r).Error; err == nil {
+	if err := db.Model(&user).Updates(r).Error; err != nil {
 		handle.ReturnError(http.StatusServiceUnavailable, "用户信息更新失败", c)
 		return
 	}
@@ -279,7 +279,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var user model.User
-	if err := db.Where("id = ?", r.ID).First(&user).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
 		return
 	}
