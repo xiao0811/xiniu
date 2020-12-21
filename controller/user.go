@@ -283,8 +283,8 @@ func DeleteUser(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
 		return
 	}
-	user.Status = 0
-	if err := db.Save(&user).Error; err != nil {
+	// user.Status = 0
+	if err := db.Delete(&user).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
 		return
 	}
