@@ -102,7 +102,7 @@ func UpdateUser(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "用户未找到", c)
 		return
 	}
-	if err := db.Model(&user).Updates(r).Error; err != nil {
+	if err := db.Model(&user).Updates(r).Error; err == nil {
 		handle.ReturnError(http.StatusServiceUnavailable, "用户信息更新失败", c)
 		return
 	}
