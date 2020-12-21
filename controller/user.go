@@ -98,7 +98,7 @@ func UpdateUser(c *gin.Context) {
 
 	var user model.User
 	db := config.GetMysql()
-	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err != nil {
+	if err := db.Where("id = ?", r.ID).Preload("Marshalling").First(&user).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "用户未找到", c)
 		return
 	}
