@@ -279,7 +279,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var user model.User
-	if err := db.Where("id = ?", r.ID).First(&user).Error; err != nil {
+	if err := db.Where("id = ?", r.ID).First(&user).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
 		return
 	}
