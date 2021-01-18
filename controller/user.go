@@ -232,7 +232,7 @@ func UserList(c *gin.Context) {
 	var pages int
 	sql := db.Preload("Marshalling").Where("status = 1").Where("id IN ?", userID)
 	if r.RealName != "" {
-		sql = sql.Where("real_name like '%" + r.RealName + "%'")
+		sql = sql.Where("real_name like '%"+r.RealName+"%'").Or("phone", r.RealName)
 	}
 	if r.Status != 0 {
 		sql = sql.Where("status = ?", r.Status)
