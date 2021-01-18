@@ -32,7 +32,7 @@ func Login(c *gin.Context) {
 	}
 
 	if err := db.Where("phone = ?", lq.Phone).First(&user).Error; err != nil {
-		handle.ReturnError(http.StatusBadRequest, "用户名密码输入不正确", c)
+		handle.ReturnError(http.StatusBadRequest, "该手机号码未注册", c)
 		return
 	}
 
