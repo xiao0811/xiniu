@@ -273,3 +273,79 @@ func GetMemberDetails(c *gin.Context) {
 		"operation": operation,
 	}, c)
 }
+
+func ExportMembers(c *gin.Context) {
+	var r struct {
+		Name            string `json:"name"`
+		Status          int    `json:"status"`
+		OperationsStaff int    `json:"operations_staff"`
+		BusinessPeople  int    `json:"business_people"`
+	}
+	var members []model.Member
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	sql := db
+
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db.Where("id = ?", token.UserID).First(&user)
+	var users []model.User
+	var names []string
+	var userID []uint
+	_sql := db.Where("status = 1")
+	if user.Duty > 1 {
+		_sql.Where("duty = ?", user.Duty)
+	}
+
+	if user.Role > 1 {
+		_sql.Where("marshalling_id = ?", user.MarshallingID)
+	}
+
+	if user.Role > 2 {
+		_sql.Where("id = ?", user.ID)
+	}
+	_sql.Find(&users)
+
+	for _, u := range users {
+		names = append(names, u.RealName)
+		userID = append(userID, u.ID)
+	}
+
+	if user.Duty == 2 { // 运营
+		sql = sql.Where("operations_staff IN ?", userID)
+	} else if user.Duty == 3 { // 业务
+		sql = sql.Where("business_people IN ?", userID)
+	}
+	if r.Status != -1 {
+		sql = sql.Where("status = ?", r.Status)
+	}
+	if r.Name != "" {
+		sql = sql.Where("name like '%" + r.Name + "%'")
+	}
+	if r.BusinessPeople != 0 {
+		sql = sql.Where("business_people = ?", r.BusinessPeople)
+	}
+	if r.OperationsStaff != 0 {
+		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
+	}
+
+	sql.Find(&members)
+
+	head := []string{"表头一", "表头二", "表头三"}
+	var body [][]interface{}
+	for _, member := range members {
+		memberInfo := []interface{}{
+			member.UUID,
+			member.Accounts,
+		}
+		body = append(body, memberInfo)
+	}
+
+	// body := [][]interface{}{{1, "2020", ""}, {2, "2019", ""}, {3, "2018", ""}}
+	filename := "test.xlsx"
+	handle.ExcelExport(c, head, body, filename)
+}
