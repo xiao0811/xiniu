@@ -274,6 +274,7 @@ func GetMemberDetails(c *gin.Context) {
 	}, c)
 }
 
+// ExportMembers 导出用户信息
 func ExportMembers(c *gin.Context) {
 	var r struct {
 		Name            string `json:"name"`
@@ -335,12 +336,27 @@ func ExportMembers(c *gin.Context) {
 
 	sql.Find(&members)
 
-	head := []string{"表头一", "表头二", "表头三"}
+	head := []string{"客户编号", "客户手机号", "点评账号", "门店名称", "城市", "行业", "主营范围", "审核状态"}
 	var body [][]interface{}
 	for _, member := range members {
+		var status string
+		switch member.Status {
+		case 0:
+			status = "待审核"
+		case 1:
+			status = "审核通过"
+		case 2:
+			status = "审核拒绝"
+		}
 		memberInfo := []interface{}{
 			member.UUID,
+			member.Phone,
 			member.Accounts,
+			member.Name,
+			member.City,
+			member.FirstCategory,
+			member.BusinessScope,
+			status,
 		}
 		body = append(body, memberInfo)
 	}
