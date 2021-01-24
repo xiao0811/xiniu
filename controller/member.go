@@ -351,7 +351,7 @@ func ExportMembers(c *gin.Context) {
 		memberInfo := []interface{}{
 			member.UUID,
 			member.Phone,
-			member.Accounts,
+			member.ReviewAccount,
 			member.Name,
 			member.City,
 			member.FirstCategory,

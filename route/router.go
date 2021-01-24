@@ -69,7 +69,7 @@ func GetRouter() *gin.Engine {
 		member.POST("/review", controller.MemberReview)
 		member.POST("/member_list", controller.MemberList)
 		member.POST("/get_member_details", controller.GetMemberDetails)
-		member.GET("/export", controller.ExportMembers)
+		member.POST("/export", controller.ExportMembers)
 	}
 	contract := token.Group("/contract")
 	{
