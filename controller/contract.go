@@ -340,6 +340,30 @@ func ContractExtension(c *gin.Context) {
 	handle.ReturnSuccess("ok", co, c)
 }
 
+// DeleteContract 删除合约
+func DeleteContract(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var contract model.Contract
+	if err := db.Where("id = ?", r.ID).First(&contract).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户不存在", c)
+		return
+	}
+	// user.Status = 0
+	if err := db.Delete(&contract).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
+		return
+	}
+
+	handle.ReturnSuccess("ok", contract, c)
+}
+
 // Task 七日任务
 type Task struct {
 	ID   int    `json:"id" binding:"required"`

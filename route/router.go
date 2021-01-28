@@ -66,6 +66,7 @@ func GetRouter() *gin.Engine {
 	{
 		member.POST("/create", controller.CreateMember)
 		member.POST("/update", controller.UpdateMember)
+		member.POST("/delete", controller.DeleteMember)
 		member.POST("/review", controller.MemberReview)
 		member.POST("/member_list", controller.MemberList)
 		member.POST("/get_member_details", controller.GetMemberDetails)
@@ -75,6 +76,7 @@ func GetRouter() *gin.Engine {
 	{
 		contract.POST("/create", controller.CreateContract)
 		contract.POST("/update", controller.UpdateContract)
+		contract.POST("/delete", controller.DeleteContract)
 		contract.POST("/review", controller.ContractReview)
 		contract.POST("/contract_list", controller.ContractList)
 		contract.POST("/get_member_details", controller.GetContractDetails)

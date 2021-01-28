@@ -204,6 +204,30 @@ func MemberList(c *gin.Context) {
 	handle.ReturnSuccess("ok", gin.H{"members": members, "pages": pages, "currPage": page}, c)
 }
 
+// DeleteMember 删除客户
+func DeleteMember(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var m model.Member
+	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户不存在", c)
+		return
+	}
+	// user.Status = 0
+	if err := db.Delete(&m).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
+		return
+	}
+
+	handle.ReturnSuccess("ok", m, c)
+}
+
 // MemberReview 客户审核
 func MemberReview(c *gin.Context) {
 	var r struct {
@@ -336,7 +360,8 @@ func ExportMembers(c *gin.Context) {
 
 	sql.Find(&members)
 
-	head := []string{"客户编号", "客户手机号", "点评账号", "门店名称", "城市", "行业", "主营范围", "审核状态"}
+	head := []string{"客户编号", "客户手机号", "点评账号", "点评密码", "门店名称", "城市", "行业",
+		"主营范围", "对接业务", "对接运营", "创建时间", "审核状态"}
 	var body [][]interface{}
 	for _, member := range members {
 		var status string
@@ -352,10 +377,14 @@ func ExportMembers(c *gin.Context) {
 			member.UUID,
 			member.Phone,
 			member.ReviewAccount,
+			member.CommentPassword,
 			member.Name,
 			member.City,
 			member.FirstCategory,
 			member.BusinessScope,
+			member.BusinessPeople,
+			member.OperationsStaff,
+			member.CreatedAt,
 			status,
 		}
 		body = append(body, memberInfo)
