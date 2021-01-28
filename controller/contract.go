@@ -112,12 +112,14 @@ func CreateContract(c *gin.Context) {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := db.Create(&con).Error; err != nil {
 			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+			log.Println("Create1: ", err)
 			return err
 		}
 		member.ExpireTime = model.MyTime{Time: _DelayTime}
 		member.NumberOfContracts++
 		member.Refund = model.MyTime{}
 		if err := db.Save(&member).Error; err != nil {
+			log.Println("Save:", err)
 			return err
 		}
 
@@ -130,6 +132,7 @@ func CreateContract(c *gin.Context) {
 		}
 		if err := db.Create(&l).Error; err != nil {
 			// handle.ReturnError(http.StatusBadRequest, "门店创建失败", c)
+			log.Println("Create2:", err)
 			return err
 		}
 
