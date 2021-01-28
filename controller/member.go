@@ -9,6 +9,7 @@ import (
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/handle"
 	"github.com/xiao0811/xiniu/model"
+	"gorm.io/gorm"
 )
 
 // CreateMember 创建一个新的客户
@@ -219,11 +220,21 @@ func DeleteMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "客户不存在", c)
 		return
 	}
-	// user.Status = 0
-	if err := db.Delete(&m).Error; err != nil {
-		handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
-		return
-	}
+
+	db.Transaction(func(tx *gorm.DB) error {
+		if err := db.Delete(&m).Error; err != nil {
+			handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
+			return err
+		}
+
+		var contracts []model.Contract
+		db.Where("member_id = ?", r.ID).Find(&contracts)
+		if err := db.Delete(&contracts).Error; err != nil {
+			return err
+		}
+		// 返回 nil 提交事务
+		return nil
+	})
 
 	handle.ReturnSuccess("ok", m, c)
 }
