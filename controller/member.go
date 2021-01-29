@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -378,12 +377,13 @@ func ExportMembers(c *gin.Context) {
 	sql.Find(&members)
 
 	var managers []model.User
-	var u = make(map[uint]string, 100)
+	var u = make(map[uint]string, 200)
+	u[0] = ""
 	db.Find(&managers)
 	for _, manager := range managers {
 		u[manager.ID] = manager.RealName
 	}
-	fmt.Println(u)
+	// fmt.Println(u)
 	head := []string{"客户编号", "客户手机号", "点评账号", "点评密码", "门店名称", "城市", "行业",
 		"主营范围", "对接业务", "对接运营", "创建时间", "审核状态"}
 	var body [][]interface{}
@@ -406,8 +406,8 @@ func ExportMembers(c *gin.Context) {
 			member.City,
 			member.FirstCategory,
 			member.BusinessScope,
-			member.BusinessPeople,
-			member.OperationsStaff,
+			u[uint(member.BusinessPeople)],
+			u[uint(member.OperationsStaff)],
 			member.CreatedAt,
 			status,
 		}
@@ -415,6 +415,6 @@ func ExportMembers(c *gin.Context) {
 	}
 
 	// body := [][]interface{}{{1, "2020", ""}, {2, "2019", ""}, {3, "2018", ""}}
-	filename := "test.xlsx"
+	filename := "客户管理" + time.Now().Format("20060102150405") + ".xlsx"
 	handle.ExcelExport(c, head, body, filename)
 }
