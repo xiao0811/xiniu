@@ -222,14 +222,14 @@ func DeleteMember(c *gin.Context) {
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := db.Delete(&m).Error; err != nil {
-			handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
-			return err
-		}
-
 		var contracts []model.Contract
 		// db.Where("member_id = ?", r.ID).Find(&contracts)
 		if err := db.Where("member_id = ?", r.ID).Delete(&contracts).Error; err != nil {
+			return err
+		}
+
+		if err := db.Delete(&m).Error; err != nil {
+			handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
 			return err
 		}
 		// 返回 nil 提交事务
