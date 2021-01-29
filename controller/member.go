@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -376,6 +377,13 @@ func ExportMembers(c *gin.Context) {
 
 	sql.Find(&members)
 
+	var managers []model.User
+	var u = make(map[uint]string, 100)
+	db.Find(&managers)
+	for _, manager := range managers {
+		u[manager.ID] = manager.RealName
+	}
+	fmt.Println(u)
 	head := []string{"客户编号", "客户手机号", "点评账号", "点评密码", "门店名称", "城市", "行业",
 		"主营范围", "对接业务", "对接运营", "创建时间", "审核状态"}
 	var body [][]interface{}
