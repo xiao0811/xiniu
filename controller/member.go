@@ -221,20 +221,25 @@ func DeleteMember(c *gin.Context) {
 		return
 	}
 
-	db.Transaction(func(tx *gorm.DB) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := db.Delete(&m).Error; err != nil {
 			handle.ReturnError(http.StatusBadRequest, "用户删除失败", c)
 			return err
 		}
 
 		var contracts []model.Contract
-		db.Where("member_id = ?", r.ID).Find(&contracts)
-		if err := db.Delete(&contracts).Error; err != nil {
+		// db.Where("member_id = ?", r.ID).Find(&contracts)
+		if err := db.Where("member_id = ?", r.ID).Delete(&contracts).Error; err != nil {
 			return err
 		}
 		// 返回 nil 提交事务
 		return nil
 	})
+
+	if err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户删除失败", c)
+		return
+	}
 
 	handle.ReturnSuccess("ok", m, c)
 }
