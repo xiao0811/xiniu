@@ -602,5 +602,145 @@ func ChangeManagement(c *gin.Context) {
 	handle.ReturnSuccess("ok", "更新成功", c)
 }
 
+// ExportContract 根据状态导出合约
+func ExportContract(c *gin.Context) {
+	var r struct {
+		Type        string `json:"type" binding:"required"`
+		Date        string `json:"date"`
+		Marshalling string `json:"marshalling"`
+		Name        string `json:"name"`
+		City        string `json:"city"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+
+	_token, _ := c.Get("token")
+	token, _ := _token.(*handle.JWTClaims)
+	var user model.User
+	db.Where("id = ?", token.UserID).First(&user)
+	var users []model.User
+	var names []string
+	var userID []uint
+	_sql := db.Where("status = 1")
+	if user.Duty > 1 {
+		_sql.Where("duty = ?", user.Duty)
+	}
+
+	if user.Role > 1 {
+		_sql.Where("marshalling_id = ?", user.MarshallingID)
+	}
+
+	if user.Role > 2 {
+		_sql.Where("id = ?", user.ID)
+	}
+	_sql.Find(&users)
+
+	for _, u := range users {
+		names = append(names, u.RealName)
+		userID = append(userID, u.ID)
+	}
+
+	var contracts []model.Contract
+	sql := db.Preload("Member").Where("status = 1")
+	log.Println(names, userID)
+	if user.Duty == 2 { // 运营
+		sql = sql.Where("operations_staff IN ?", names)
+	} else if user.Duty == 3 { // 业务
+		sql = sql.Where("business_people IN ?", names)
+	}
+	var date string
+	if r.Date != "" {
+		date = r.Date
+	} else {
+		date = time.Now().Format("2006-01")
+	}
+	dt, _ := time.ParseInLocation("2006-01", date, time.Local)
+	start := dt
+	end := dt.AddDate(0, 1, 0)
+
+	switch r.Type {
+	case "newly": // 新签客户
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
+	case "inserve": // 服务中客户
+		sql.Where("delay_time >= ? AND cooperation_time <= ?", time.Now(), time.Now()).Where("refund IS NULL")
+	case "beexpire": // 即将断约
+		sql.Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
+	case "renewal": // 续约客户
+		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
+	case "break": // 断约客户
+		if r.Date == time.Now().Format("2006-01") || r.Date == "" {
+			end = time.Now()
+		}
+		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
+		}).Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
+	case "return": // 退款客户
+		sql.Where("refund >= ? AND refund < ?", start, end)
+	case "recycle": // 回收站
+	default:
+
+	}
+
+	if r.City != "" {
+		sql.Preload("Member", func(db *gorm.DB) *gorm.DB {
+			return db.Where("city like ?", "%"+r.City+"%")
+		})
+	}
+
+	if r.Marshalling != "" {
+		sql.Where("operations_staff like ?", "%"+r.Marshalling+"%").
+			Or("business_people like ?", "%"+r.Marshalling+"%")
+	}
+
+	if r.Name != "" {
+		sql.Where("name like ?", "%"+r.Name+"%")
+	}
+
+	sql.Find(&contracts)
+
+	var managers []model.User
+	var u = make(map[uint]string, 200)
+	u[0] = ""
+	db.Find(&managers)
+	for _, manager := range managers {
+		u[manager.ID] = manager.RealName
+	}
+	// fmt.Println(u)
+	head := []string{"客户编号", "门店名称", "城市", "所属行业", "合约金额", "合约时间",
+		"对接业务", "对接运营", "签约次数", "审核状态"}
+	var body [][]interface{}
+	for _, contract := range contracts {
+		var status string
+		switch contract.Status {
+		case 0:
+			status = "待审核"
+		case 1:
+			status = "审核通过"
+		case 2:
+			status = "审核拒绝"
+		}
+		memberInfo := []interface{}{
+			contract.UUID,
+			contract.Member.Name,
+			contract.Member.City,
+			contract.Member.BusinessScope,
+			contract.ContractAmount,
+			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
+			u[uint(contract.Member.BusinessPeople)],
+			u[uint(contract.Member.OperationsStaff)],
+			contract.Sort,
+			status,
+		}
+		body = append(body, memberInfo)
+	}
+
+	// body := [][]interface{}{{1, "2020", ""}, {2, "2019", ""}, {3, "2018", ""}}
+	filename := "合约管理" + time.Now().Format("20060102150405") + ".xlsx"
+	handle.ExcelExport(c, head, body, filename)
+}
+
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);
 // ALTER TABLE members ADD COLUMN `refund` datetime(3);

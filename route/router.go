@@ -78,6 +78,7 @@ func GetRouter() *gin.Engine {
 		contract.POST("/update", controller.UpdateContract)
 		contract.POST("/delete", controller.DeleteContract)
 		contract.POST("/review", controller.ContractReview)
+		contract.POST("/export", controller.ExportContract)
 		contract.POST("/contract_list", controller.ContractList)
 		contract.POST("/get_member_details", controller.GetContractDetails)
 		// 合约延期
