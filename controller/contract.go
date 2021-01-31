@@ -709,7 +709,7 @@ func ExportContract(c *gin.Context) {
 		u[manager.ID] = manager.RealName
 	}
 	// fmt.Println(u)
-	head := []string{"客户编号", "门店名称", "城市", "所属行业", "合约金额", "合约时间",
+	head := []string{"合约编号", "门店名称", "城市", "所属行业", "合约金额", "合约时间",
 		"对接业务", "对接运营", "签约次数", "审核状态"}
 	var body [][]interface{}
 	for _, contract := range contracts {
