@@ -731,7 +731,7 @@ func ExportContract(c *gin.Context) {
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
 			u[uint(contract.Member.BusinessPeople)],
 			u[uint(contract.Member.OperationsStaff)],
-			contract.Sort,
+			contract.Sort + 1,
 			status,
 		}
 		body = append(body, memberInfo)
