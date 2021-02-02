@@ -250,7 +250,9 @@ func UpdateContract(c *gin.Context) {
 		Remarks:  token.FullName + "更新合约: " + r.UUID,
 	}
 	db.Create(&l)
-
+	if r.Status > 10 {
+		db.Model(&r).Select("status").Updates(model.Contract{Status: 0})
+	}
 	handle.ReturnSuccess("ok", r, c)
 }
 

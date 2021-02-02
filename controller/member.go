@@ -116,6 +116,9 @@ func UpdateMember(c *gin.Context) {
 		Remarks:  token.FullName + "更新用户: " + r.Name,
 	}
 	db.Create(&l)
+	if r.Status > 10 {
+		db.Model(&r).Select("status").Updates(model.Member{Status: 0})
+	}
 	handle.ReturnSuccess("ok", r, c)
 }
 
