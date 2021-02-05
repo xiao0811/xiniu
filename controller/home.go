@@ -31,7 +31,7 @@ func CountData(c *gin.Context) {
 	if user.Duty == 1 || user.Role == 1 {
 		db.Where("status = 1").Find(&users)
 	} else if user.Role == 2 {
-		db.Where("duty = 2 AND status = 1 AND MarshallingID = ?", user.MarshallingID).Find(&users)
+		db.Where("duty = 2 AND status = 1 AND marshalling_id = ?", user.MarshallingID).Find(&users)
 	} else {
 		db.Where("id = ?", user.ID).Find(&users)
 	}
