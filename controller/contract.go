@@ -208,10 +208,11 @@ func ContractList(c *gin.Context) {
 		sql = sql.Where("status = ?", r.Status)
 	}
 	if r.Key != "" {
+		_db := config.GetMysql()
 		var members []model.Member
 		var ids []uint
 		fmt.Println(r.Key, "%"+r.Key+"%")
-		db.Where("name LIKE ?", "%"+r.Key+"%").Find(members)
+		_db.Where("name LIKE ?", "%"+r.Key+"%").Find(members)
 		for _, member := range members {
 			ids = append(ids, member.ID)
 		}
