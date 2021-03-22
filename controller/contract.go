@@ -152,6 +152,7 @@ func ContractList(c *gin.Context) {
 	var r struct {
 		UUID     string `json:"uuid"`
 		MemberID uint   `json:"member_id"`
+		Key      string `json:"key"`
 		Status   int    `json:"status"`
 		Page     int    `json:"page"`
 		Limit    int    `json:"limit"`
@@ -205,6 +206,15 @@ func ContractList(c *gin.Context) {
 	}
 	if r.Status != -1 {
 		sql = sql.Where("status = ?", r.Status)
+	}
+	if r.Key != "" {
+		var members []model.Member
+		db.Where("name LIKE ?", "%"+r.Key+"%").Find(members)
+		var ids []uint
+		for _, member := range members {
+			ids = append(ids, member.ID)
+		}
+		sql = sql.Where("member_id IN ?", ids)
 	}
 	var page int
 	_count := sql

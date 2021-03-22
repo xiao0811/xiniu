@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Export 导出 Excel
+// ExcelExport 导出 Excel
 func ExcelExport(c *gin.Context, head []string, body [][]interface{}, filename string) {
 	xlsx := excelize.NewFile()
 	_ = xlsx.SetSheetRow("Sheet1", "A1", &head)

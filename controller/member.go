@@ -125,7 +125,7 @@ func UpdateMember(c *gin.Context) {
 // MemberList 客户列表
 func MemberList(c *gin.Context) {
 	var r struct {
-		Name            string `json:"name"`
+		Name            string `json:"key"` // 前端传入的门店名称
 		Page            int    `json:"page"`
 		Limit           int    `json:"limit"`
 		Status          int    `json:"status"`
