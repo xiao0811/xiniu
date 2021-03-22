@@ -97,9 +97,10 @@ func ReviewRefund(c *gin.Context) {
 // GetRefundList 获取审核列表
 func GetRefundList(c *gin.Context) {
 	var r struct {
-		Contract uint `json:"contract"`
-		Status   int8 `json:"status"`
-		Page     int  `json:"page"`
+		Contract uint   `json:"contract"`
+		Key      string `json:"key"`
+		Status   int8   `json:"status"`
+		Page     int    `json:"page"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -121,6 +122,25 @@ func GetRefundList(c *gin.Context) {
 	} else {
 		page = r.Page
 	}
+
+	if r.Key != "" {
+		_db := config.GetMysql()
+		var members []model.Member
+		var ids []uint
+		var contracts []model.Contract
+		var _ids []uint
+		_db.Where("name LIKE ?", "%"+r.Key+"%").Find(&members)
+		for _, member := range members {
+			ids = append(ids, member.ID)
+		}
+		_db.Where("member_id IN ?", ids).Find(&contracts)
+		for _, contract := range contracts {
+			_ids = append(_ids, contract.ID)
+		}
+
+		sql = sql.Where("contract_id IN ?", _ids)
+	}
+
 	sql.Limit(10).Offset((page - 1) * 10).Find(&refunds)
 
 	if int(count)%10 != 0 {
