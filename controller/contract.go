@@ -209,8 +209,9 @@ func ContractList(c *gin.Context) {
 	}
 	if r.Key != "" {
 		var members []model.Member
-		db.Where("name LIKE ?", "%"+r.Key+"%").Find(members)
 		var ids []uint
+		fmt.Println(r.Key, "%"+r.Key+"%")
+		db.Where("name LIKE ?", "%"+r.Key+"%").Find(members)
 		for _, member := range members {
 			ids = append(ids, member.ID)
 		}
