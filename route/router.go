@@ -91,6 +91,7 @@ func GetRouter() *gin.Engine {
 		// 退款
 		contract.POST("/refund", controller.ContractRefund)
 		contract.POST("/change_management", controller.ChangeManagement)
+		contract.POST("/batch_change_management", controller.BatchChangeManagement)
 	}
 
 	cts := token.Group("/contract_task")
