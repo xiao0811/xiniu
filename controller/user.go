@@ -313,3 +313,21 @@ func UserBatchGroup(c *gin.Context) {
 	})
 	handle.ReturnSuccess("ok", "批量修改成功", c)
 }
+
+func GetMember(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	var members []model.Member
+	db := config.GetMysql()
+	if err := db.Where("operations_staff = ? OR business_people = ?", r.ID, r.ID).Find(&members).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "", c)
+	}
+	handle.ReturnSuccess("ok", members, c)
+}
