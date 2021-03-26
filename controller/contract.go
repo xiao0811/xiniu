@@ -578,42 +578,107 @@ func ChangeManagement(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
+	var types string
+	var id int
+	if r.BusinessPeople != 0 {
+		types = "BusinessPeople"
+		id = r.BusinessPeople
+	} else if r.OperationsStaff != 0 {
+		types = "OperationsStaff"
+		id = r.OperationsStaff
+	}
+
+	err := changeManagement(r.ID, types, id)
+	if err != nil {
+		handle.ReturnError(http.StatusBadRequest, "更新失败", c)
+	}
+
+	handle.ReturnSuccess("更新成功", "", c)
+}
+
+// BatchChangeManagement 批量更换管理人员
+func BatchChangeManagement(c *gin.Context) {
+	var r struct {
+		IDs             []uint `json:"ids" binding:"required"`
+		OperationsStaff int    `json:"operations_staff"` // 运营人员
+		BusinessPeople  int    `json:"business_people"`  // 业务人员
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	var types string
+	var id int
+	if r.BusinessPeople != 0 {
+		types = "BusinessPeople"
+		id = r.BusinessPeople
+	} else if r.OperationsStaff != 0 {
+		types = "OperationsStaff"
+		id = r.OperationsStaff
+	}
+	var e error
+	for _, _id := range r.IDs {
+		err := changeManagement(_id, types, id)
+		if err != nil {
+			e = err
+			continue
+		}
+	}
+
+	handle.ReturnSuccess("ok", e, c)
+}
+
+// 修改客户管理 types: OperationsStaff/BusinessPeople
+func changeManagement(member uint, types string, management int) error {
 	db := config.GetMysql()
 	var m model.Member
 	var u model.Contract
-	if err := db.Where("id = ?", r.ID).First(&m).Error; err != nil {
-		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
-		return
+	if err := db.Where("id = ?", member).First(&m).Error; err != nil {
+		return err
 	}
-	if r.OperationsStaff != 0 {
-		m.OperationsStaff = r.OperationsStaff
+
+	if types == "OperationsStaff" {
+		m.OperationsStaff = management
 		var operationsStaff model.User
-		db.Where("id = ?", r.OperationsStaff).First(&operationsStaff)
+		db.Where("id = ?", management).First(&operationsStaff)
 		u.OperationsStaff = operationsStaff.RealName
-	}
-	if r.BusinessPeople != 0 {
-		m.BusinessPeople = r.BusinessPeople
+	} else if types == "BusinessPeople" {
+		m.BusinessPeople = management
 		var businessPeople model.User
-		db.Where("id = ?", r.BusinessPeople).First(&businessPeople)
+		db.Where("id = ?", management).First(&businessPeople)
 		u.BusinessPeople = businessPeople.RealName
 	}
+	// if r.OperationsStaff != 0 {
+	// 	m.OperationsStaff = r.OperationsStaff
+	// 	var operationsStaff model.User
+	// 	db.Where("id = ?", r.OperationsStaff).First(&operationsStaff)
+	// 	u.OperationsStaff = operationsStaff.RealName
+	// }
+	// if r.BusinessPeople != 0 {
+	// 	m.BusinessPeople = r.BusinessPeople
+	// 	var businessPeople model.User
+	// 	db.Where("id = ?", r.BusinessPeople).First(&businessPeople)
+	// 	u.BusinessPeople = businessPeople.RealName
+	// }
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&m).Error; err != nil {
 			return err
 		}
 
-		if err := db.Model(&model.Contract{}).Where("member_id = ?", r.ID).Updates(u).Error; err != nil {
+		if err := db.Model(&model.Contract{}).Where("member_id = ?", member).Updates(u).Error; err != nil {
 			return err
 		}
 
 		// 返回 nil 提交事务
 		return nil
 	})
+
 	if err != nil {
-		handle.ReturnError(http.StatusBadRequest, "更新失败", c)
-		return
+		return err
 	}
-	handle.ReturnSuccess("ok", "更新成功", c)
+	return nil
 }
 
 // ExportContract 根据状态导出合约
