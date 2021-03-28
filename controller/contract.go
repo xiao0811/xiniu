@@ -803,7 +803,13 @@ func ExportContract(c *gin.Context) {
 		// case 2:
 		// 	status = "审核拒绝"
 		// }
-		var arrives, upgrade, includeDetailsPage string
+		var isStartService, arrives, upgrade, includeDetailsPage string
+
+		if contract.IsStartService == true {
+			isStartService = "是"
+		} else {
+			isStartService = "否"
+		}
 
 		if contract.Arrives == true {
 			arrives = "是"
@@ -827,7 +833,7 @@ func ExportContract(c *gin.Context) {
 			contract.Member.Name,
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
 			contract.ExpireTime,
-			contract.IsStartService,
+			isStartService,
 			contract.DelayTime,
 			contract.ContractAmount,
 			arrives,
