@@ -804,7 +804,7 @@ func ExportContract(c *gin.Context) {
 		// 	status = "审核拒绝"
 		// }
 		memberInfo := []interface{}{
-			contract.MemberID,
+			contract.Member.Name,
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
 			contract.ExpireTime,
 			contract.IsStartService,
