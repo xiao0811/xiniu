@@ -34,6 +34,7 @@ type Member struct {
 	Status            int8       `json:"status"`
 	Remarks           string     `json:"remarks"`
 	Reason            string     `json:"reason"` // 审核备注
+	Beizhu            string     `json:"beizhu" gorm:"type:text"`
 	CreatedAt         MyTime     `json:"created_at"`
 	UpdatedAt         MyTime     `json:"updated_at"`
 }

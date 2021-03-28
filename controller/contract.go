@@ -788,30 +788,52 @@ func ExportContract(c *gin.Context) {
 		u[manager.ID] = manager.RealName
 	}
 	// fmt.Println(u)
-	head := []string{"合约编号", "门店名称", "城市", "所属行业", "合约金额", "合约时间",
-		"对接业务", "对接运营", "签约次数", "审核状态"}
+	head := []string{"门店ID", "合作时间", "到期时间", "是否开始服务", "延后到期时间", "签约金额",
+		"是否到账", "有无欠款", "目前门店收藏量", "目前评价数量", "目前星级", "目前排行榜", "门店收藏量",
+		"信息流", "小红书", "团购数量", "点赞数量", "关注同行", "推广现状", "是否升级金牌店铺",
+		"是否包含详情页", "备注"}
 	var body [][]interface{}
 	for _, contract := range contracts {
-		var status string
-		switch contract.Status {
-		case 0:
-			status = "待审核"
-		case 1:
-			status = "审核通过"
-		case 2:
-			status = "审核拒绝"
-		}
+		// var status string
+		// switch contract.Status {
+		// case 0:
+		// 	status = "待审核"
+		// case 1:
+		// 	status = "审核通过"
+		// case 2:
+		// 	status = "审核拒绝"
+		// }
 		memberInfo := []interface{}{
-			contract.UUID,
-			contract.Member.Name,
-			contract.Member.City,
-			contract.Member.BusinessScope,
-			contract.ContractAmount,
+			contract.MemberID,
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
-			u[uint(contract.Member.BusinessPeople)],
-			u[uint(contract.Member.OperationsStaff)],
-			contract.Sort + 1,
-			status,
+			contract.ExpireTime,
+			contract.IsStartService,
+			contract.DelayTime,
+			contract.ContractAmount,
+			contract.Arrives,
+			contract.Arrears,
+			contract.CurrentStoreCollections,
+			contract.CurrentNumber,
+			contract.CurrentStar,
+			contract.CurrentLeaderboard,
+			contract.StoreCollections,
+			contract.InformationFlow,
+			contract.BigVReview, // 此处小红书待补充
+			contract.GroupBuyingVolume,
+			contract.Like,
+			contract.FollowPeers,
+			contract.CurrentStatusOfPromotion,
+			contract.Upgrade,
+			contract.IncludeDetailsPage,
+			contract.Remarks,
+			// contract.Member.Name,
+			// contract.Member.City,
+			// contract.Member.BusinessScope,
+			// contract.ContractAmount,
+			// u[uint(contract.Member.BusinessPeople)],
+			// u[uint(contract.Member.OperationsStaff)],
+			// contract.Sort + 1,
+			// status,
 		}
 		body = append(body, memberInfo)
 	}
