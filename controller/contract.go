@@ -788,7 +788,7 @@ func ExportContract(c *gin.Context) {
 		u[manager.ID] = manager.RealName
 	}
 	// fmt.Println(u)
-	head := []string{"门店ID", "合作时间", "到期时间", "是否开始服务", "延后到期时间", "签约金额",
+	head := []string{"门店名称", "合作时间", "到期时间", "是否开始服务", "延后到期时间", "签约金额",
 		"是否到账", "有无欠款", "目前门店收藏量", "目前评价数量", "目前星级", "目前排行榜", "门店收藏量",
 		"信息流", "小红书", "团购数量", "点赞数量", "关注同行", "推广现状", "是否升级金牌店铺",
 		"是否包含详情页", "备注"}
@@ -803,6 +803,26 @@ func ExportContract(c *gin.Context) {
 		// case 2:
 		// 	status = "审核拒绝"
 		// }
+		var arrives, upgrade, includeDetailsPage string
+
+		if contract.Arrives == true {
+			arrives = "是"
+		} else {
+			arrives = "否"
+		}
+
+		if contract.Upgrade == true {
+			upgrade = "是"
+		} else {
+			upgrade = "否"
+		}
+
+		if contract.IncludeDetailsPage == true {
+			includeDetailsPage = "是"
+		} else {
+			includeDetailsPage = "否"
+		}
+
 		memberInfo := []interface{}{
 			contract.Member.Name,
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
@@ -810,7 +830,7 @@ func ExportContract(c *gin.Context) {
 			contract.IsStartService,
 			contract.DelayTime,
 			contract.ContractAmount,
-			contract.Arrives,
+			arrives,
 			contract.Arrears,
 			contract.CurrentStoreCollections,
 			contract.CurrentNumber,
@@ -823,8 +843,8 @@ func ExportContract(c *gin.Context) {
 			contract.Like,
 			contract.FollowPeers,
 			contract.CurrentStatusOfPromotion,
-			contract.Upgrade,
-			contract.IncludeDetailsPage,
+			upgrade,
+			includeDetailsPage,
 			contract.Remarks,
 			// contract.Member.Name,
 			// contract.Member.City,
