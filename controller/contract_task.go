@@ -15,13 +15,17 @@ import (
 // CreateContractTask 添加合约任务记录
 func CreateContractTask(c *gin.Context) {
 	var r struct {
-		Type            uint8    `json:"type"`
-		ContractID      uint     `json:"contract_id"`
-		OperationsStaff string   `json:"operations_staff" gorm:"type:varchar(20)"`
-		TaskCount       uint8    `json:"task_count"`
-		CompleteTime    string   `json:"complete_time"`
-		Images          []string `json:"images"`
-		Status          uint8    `json:"status"`
+		Type            uint8    `json:"type"`                                     // 任务类型
+		ContractID      uint     `json:"contract_id"`                              // 合约ID
+		OperationsStaff string   `json:"operations_staff" gorm:"type:varchar(20)"` // 运营人员
+		TaskCount       uint8    `json:"task_count"`                               // 总任务量
+		Initial         uint     `json:"initial"`                                  // 初始值
+		CompleteTime    string   `json:"complete_time"`                            // 完成时间
+		StoreLink       string   `json:"store_link"`                               // 门店链接
+		Requirements    string   `json:"requirements"`                             // 任务要求
+		Images          []string `json:"images"`                                   // 图片
+		Status          uint8    `json:"status"`                                   // 状态
+		Remark          string   `json:"remark"`                                   // 备注
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -42,6 +46,7 @@ func CreateContractTask(c *gin.Context) {
 		CompleteTime:    model.MyTime{Time: _CompleteTime},
 		Images:          string(ij),
 		Status:          1,
+		Remark:          r.Remark,
 	}
 	if err := db.Create(&ct).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "任务记录创建失败", c)

@@ -805,25 +805,25 @@ func ExportContract(c *gin.Context) {
 		// }
 		var isStartService, arrives, upgrade, includeDetailsPage string
 
-		if contract.IsStartService == true {
+		if contract.IsStartService {
 			isStartService = "是"
 		} else {
 			isStartService = "否"
 		}
 
-		if contract.Arrives == true {
+		if contract.Arrives {
 			arrives = "是"
 		} else {
 			arrives = "否"
 		}
 
-		if contract.Upgrade == true {
+		if contract.Upgrade {
 			upgrade = "是"
 		} else {
 			upgrade = "否"
 		}
 
-		if contract.IncludeDetailsPage == true {
+		if contract.IncludeDetailsPage {
 			includeDetailsPage = "是"
 		} else {
 			includeDetailsPage = "否"
