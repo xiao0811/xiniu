@@ -12,6 +12,7 @@ type ContractTask struct {
 	CompleteTime     MyTime `json:"complete_time"`                            // 完成时间
 	ActualCompletion MyTime `json:"actual_completion"`                        // 实际完成时间
 	StoreLink        string `json:"store_link"`                               // 门店链接
+	Mediator         string `json:"mediator" gorm:"type:varchar(20)"`         // 媒介人员
 	Requirements     string `json:"requirements"`                             // 任务要求
 	Images           string `json:"images"`                                   // 图片
 	Status           uint8  `json:"status"`                                   // 状态

@@ -23,6 +23,7 @@ func CreateContractTask(c *gin.Context) {
 		CompleteTime    string   `json:"complete_time"`                            // 完成时间
 		StoreLink       string   `json:"store_link"`                               // 门店链接
 		Requirements    string   `json:"requirements"`                             // 任务要求
+		Mediator        string   `json:"mediator"`                                 // 媒介人员
 		Images          []string `json:"images"`                                   // 图片
 		Status          uint8    `json:"status"`                                   // 状态
 		Remark          string   `json:"remark"`                                   // 备注
@@ -47,6 +48,7 @@ func CreateContractTask(c *gin.Context) {
 		Images:          string(ij),
 		Status:          1,
 		Remark:          r.Remark,
+		Mediator:        r.Mediator,
 	}
 	if err := db.Create(&ct).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "任务记录创建失败", c)
