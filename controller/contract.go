@@ -394,7 +394,7 @@ func GetContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	fmt.Println(r.ID)
+	// fmt.Println(r.ID)
 	db := config.GetMysql()
 	var co model.Contract
 	if err := db.Where("id = ?", r.ID).First(&co).Error; err != nil {
@@ -803,40 +803,40 @@ func ExportContract(c *gin.Context) {
 		// case 2:
 		// 	status = "审核拒绝"
 		// }
-		var isStartService, arrives, upgrade, includeDetailsPage string
+		// var isStartService, arrives, upgrade, includeDetailsPage string
 
-		if contract.IsStartService {
-			isStartService = "是"
-		} else {
-			isStartService = "否"
-		}
+		// if contract.IsStartService {
+		// 	isStartService = "是"
+		// } else {
+		// 	isStartService = "否"
+		// }
 
-		if contract.Arrives {
-			arrives = "是"
-		} else {
-			arrives = "否"
-		}
+		// if contract.Arrives {
+		// 	arrives = "是"
+		// } else {
+		// 	arrives = "否"
+		// }
 
-		if contract.Upgrade {
-			upgrade = "是"
-		} else {
-			upgrade = "否"
-		}
+		// if contract.Upgrade {
+		// 	upgrade = "是"
+		// } else {
+		// 	upgrade = "否"
+		// }
 
-		if contract.IncludeDetailsPage {
-			includeDetailsPage = "是"
-		} else {
-			includeDetailsPage = "否"
-		}
+		// if contract.IncludeDetailsPage {
+		// 	includeDetailsPage = "是"
+		// } else {
+		// 	includeDetailsPage = "否"
+		// }
 
 		memberInfo := []interface{}{
 			contract.Member.Name,
 			contract.CooperationTime.Format("2006-01-02") + "--" + contract.ExpireTime.Format("2006-01-02"),
 			contract.ExpireTime,
-			isStartService,
+			boolToString(contract.IsStartService),
 			contract.DelayTime,
 			contract.ContractAmount,
-			arrives,
+			boolToString(contract.Arrives),
 			contract.Arrears,
 			contract.CurrentStoreCollections,
 			contract.CurrentNumber,
@@ -849,8 +849,8 @@ func ExportContract(c *gin.Context) {
 			contract.Like,
 			contract.FollowPeers,
 			contract.CurrentStatusOfPromotion,
-			upgrade,
-			includeDetailsPage,
+			boolToString(contract.Upgrade),
+			boolToString(contract.IncludeDetailsPage),
 			contract.Remarks,
 			// contract.Member.Name,
 			// contract.Member.City,
@@ -867,6 +867,16 @@ func ExportContract(c *gin.Context) {
 	// body := [][]interface{}{{1, "2020", ""}, {2, "2019", ""}, {3, "2018", ""}}
 	filename := "合约管理" + time.Now().Format("20060102150405") + ".xlsx"
 	handle.ExcelExport(c, head, body, filename)
+}
+
+func boolToString(b bool) string {
+	var s string
+	if b {
+		s = "是"
+	} else {
+		s = "否"
+	}
+	return s
 }
 
 // ALTER TABLE contracts ADD COLUMN `operations_staff` VARCHAR(10);

@@ -25,7 +25,7 @@ func CreateContractTask(c *gin.Context) {
 		Requirements    string   `json:"requirements"`                             // 任务要求
 		Mediator        string   `json:"mediator"`                                 // 媒介人员
 		Images          []string `json:"images"`                                   // 图片
-		Status          uint8    `json:"status"`                                   // 状态
+		Status          uint8    `json:"status"`                                   // 状态 1: 新建/未完成 10: 完成 20: 取消
 		Remark          string   `json:"remark"`                                   // 备注
 	}
 	if err := c.ShouldBind(&r); err != nil {
@@ -101,14 +101,20 @@ func DeleteContractTask(c *gin.Context) {
 // GetContractTaskList 获取任务列表
 func GetContractTaskList(c *gin.Context) {
 	var r struct {
-		Type            uint8  `json:"type"`
-		ContractID      uint   `json:"contract_id"`
-		OperationsStaff string `json:"operations_staff"`
+		Type            uint8        `json:"type"`
+		ContractID      uint         `json:"contract_id"`
+		OperationsStaff string       `json:"operations_staff"`
+		StartTime       model.MyTime `json:"start_time"`
+		EndTime         model.MyTime `json:"end_time"`
+		Pagination      bool         `json:"pagination"`
+		Page            int          `json:"page"`
+		Limit           int          `json:"limit"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
+
 	db := config.GetMysql()
 	sql := db
 	var cts []model.ContractTask
@@ -121,7 +127,30 @@ func GetContractTaskList(c *gin.Context) {
 	if r.OperationsStaff != "" {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
 	}
-	sql.Order("created_at desc").Find(&cts)
+	var data gin.H
+	if r.Pagination {
+		var count int64
+		var pages int
+		var page int
+		_count := sql
+		_count.Find(&cts).Order("id desc").Count(&count)
+		if r.Page == 0 {
+			page = 1
+		} else {
+			page = r.Page
+		}
+		sql.Limit(10).Offset((page - 1) * 10).Find(&cts)
 
-	handle.ReturnSuccess("ok", cts, c)
+		if int(count)%10 != 0 {
+			pages = int(count)/10 + 1
+		} else {
+			pages = int(count) / 10
+		}
+		data = gin.H{"tasks": cts, "pages": pages, "currPage": page}
+	} else {
+		sql.Order("created_at desc").Find(&cts)
+		data = gin.H{"tasks": cts}
+	}
+
+	handle.ReturnSuccess("ok", data, c)
 }
