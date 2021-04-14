@@ -109,6 +109,7 @@ func GetContractTaskList(c *gin.Context) {
 		Pagination      bool         `json:"pagination"`
 		Page            int          `json:"page"`
 		Limit           int          `json:"limit"`
+		Status          uint8        `json:"status"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -127,6 +128,19 @@ func GetContractTaskList(c *gin.Context) {
 	if r.OperationsStaff != "" {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
 	}
+
+	if r.Status != 0 {
+		sql = sql.Where("status = ?", r.Status)
+	}
+
+	if r.StartTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
+		sql = sql.Where("created_at > ?", r.StartTime)
+	}
+
+	if r.EndTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
+		sql = sql.Where("created_at < ?", r.EndTime)
+	}
+
 	var data gin.H
 	if r.Pagination {
 		var count int64
