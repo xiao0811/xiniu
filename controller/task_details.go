@@ -14,12 +14,12 @@ import (
 // CreateContractTaskDetails 创建任务详情
 func CreateContractTaskDetails(c *gin.Context) {
 	var r struct {
-		ContractID uint   `json:"contract_id" binding:"required"` // 合约 ID
-		Completed  uint16 `json:"completed"`                      // 完成量
-		Operator   string `json:"operator"`                       // 操作人员
-		Image      string `json:"image"`                          // 完成图片
-		Remark     string `json:"remark"`                         // 备注
-		DoneTime   string `json:"done_time"`
+		TaskID    uint   `json:"task_id" binding:"required"` // 合约 ID
+		Completed uint16 `json:"completed"`                  // 完成量
+		Operator  string `json:"operator"`                   // 操作人员
+		Image     string `json:"image"`                      // 完成图片
+		Remark    string `json:"remark"`                     // 备注
+		DoneTime  string `json:"done_time"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -28,11 +28,11 @@ func CreateContractTaskDetails(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
+	var task model.ContractTask
 	var operator string
 	var contract model.Contract
-	var task model.ContractTask
-	db.Where("id = ?", r.ContractID).First(&contract)
-	db.Where("contract_id = ?", contract.ID).First(&task)
+	db.Where("id = ?", r.TaskID).First(&task)
+	db.Where("id = ?", task.ContractID).First(&contract)
 	if r.Operator == "" {
 		_token, _ := c.Get("token")
 		token, _ := _token.(*handle.JWTClaims)
@@ -42,12 +42,12 @@ func CreateContractTaskDetails(c *gin.Context) {
 	}
 
 	d := model.TaskDetails{
-		ContractID: r.ContractID,
-		Completed:  r.Completed,
-		Operator:   operator,
-		Image:      r.Image,
-		Remark:     r.Remark,
-		DoneTime:   r.DoneTime,
+		TaskID:    r.TaskID,
+		Completed: r.Completed,
+		Operator:  operator,
+		Image:     r.Image,
+		Remark:    r.Remark,
+		DoneTime:  r.DoneTime,
 	}
 
 	if contract.Type == 3 || contract.Type == 33 || contract.Type == 333 {
