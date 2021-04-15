@@ -226,8 +226,17 @@ func DeleteMember(c *gin.Context) {
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var contracts []model.Contract
+
+		db.Where("member_id = ?", r.ID).Find(&contracts)
+		for _, contract := range contracts {
+			var tasks []model.ContractTask
+			if err := db.Where("contract_id = ?", contract.ID).Delete(&tasks).Error; err != nil {
+				return err
+			}
+		}
+
 		// db.Where("member_id = ?", r.ID).Find(&contracts)
-		if err := db.Where("member_id = ?", r.ID).Delete(&contracts).Error; err != nil {
+		if err := db.Delete(&contracts).Error; err != nil {
 			return err
 		}
 
