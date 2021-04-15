@@ -38,11 +38,17 @@ func CreateContractTask(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "时间格式不正确", c)
 		return
 	}
+
+	var member model.Member
+	var contreact model.Contract
+	db.Where("id = ?", r.ContractID).First(&contreact)
+	db.Where("id = ?", contreact.MemberID).First(&member)
+
 	ij, _ := json.Marshal(r.Images)
 	ct := model.ContractTask{
-		Type:       r.Type,
-		ContractID: r.ContractID,
-		// Member: ,
+		Type:            r.Type,
+		ContractID:      r.ContractID,
+		Member:          member.Name,
 		OperationsStaff: r.OperationsStaff,
 		TaskCount:       r.TaskCount,
 		CompleteTime:    model.MyTime{Time: _CompleteTime},
