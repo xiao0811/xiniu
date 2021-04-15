@@ -19,6 +19,7 @@ func CreateContractTaskDetails(c *gin.Context) {
 		Operator   string `json:"operator"`                       // 操作人员
 		Image      string `json:"image"`                          // 完成图片
 		Remark     string `json:"remark"`                         // 备注
+		DoneTime   string `json:"done_time"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -46,6 +47,7 @@ func CreateContractTaskDetails(c *gin.Context) {
 		Operator:   operator,
 		Image:      r.Image,
 		Remark:     r.Remark,
+		DoneTime:   r.DoneTime,
 	}
 
 	if contract.Type == 3 || contract.Type == 33 || contract.Type == 333 {
