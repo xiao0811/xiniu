@@ -27,7 +27,7 @@ type Contract struct {
 	Upgrade                  bool           `json:"upgrade"`                               // 是否提升金牌店铺
 	IncludeDetailsPage       bool           `json:"include_details_page"`                  // 是否包含详情页
 	Status                   int8           `json:"status"`
-	Type                     int8           `json:"type"`
+	Type                     int16          `json:"type"`
 	Task                     string         `json:"task"`
 	ContractTask             []ContractTask `json:"contract_task"`
 	Remarks                  string         `json:"remarks"`          // 备注

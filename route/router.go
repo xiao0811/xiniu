@@ -100,6 +100,9 @@ func GetRouter() *gin.Engine {
 		cts.POST("/create", controller.CreateContractTask)
 		cts.POST("/delete", controller.DeleteContractTask)
 		cts.POST("/get_list", controller.GetContractTaskList)
+
+		cts.POST("/create_details", controller.CreateContractTaskDetails)
+		cts.POST("/get_tesk_details", controller.GetContractTasKDetails)
 	}
 	upload := token.Group("/upload")
 	{
