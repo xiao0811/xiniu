@@ -40,8 +40,9 @@ func CreateContractTask(c *gin.Context) {
 	}
 	ij, _ := json.Marshal(r.Images)
 	ct := model.ContractTask{
-		Type:            r.Type,
-		ContractID:      r.ContractID,
+		Type:       r.Type,
+		ContractID: r.ContractID,
+		// Member: ,
 		OperationsStaff: r.OperationsStaff,
 		TaskCount:       r.TaskCount,
 		CompleteTime:    model.MyTime{Time: _CompleteTime},
@@ -134,11 +135,11 @@ func GetContractTaskList(c *gin.Context) {
 	}
 
 	if r.StartTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
-		sql = sql.Where("created_at > ?", r.StartTime)
+		sql = sql.Where("complete_time > ?", r.StartTime)
 	}
 
 	if r.EndTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
-		sql = sql.Where("created_at < ?", r.EndTime)
+		sql = sql.Where("complete_time < ?", r.EndTime)
 	}
 
 	var data gin.H

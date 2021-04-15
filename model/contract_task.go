@@ -5,6 +5,7 @@ type ContractTask struct {
 	ID               uint   `gorm:"primarykey" json:"id" binding:"required"`
 	Type             uint8  `json:"type"`                                     // 任务类型
 	ContractID       uint   `json:"contract_id"`                              // 合约ID
+	Member           string `json:"member" gorm:"type:varchar(20)"`           // 门店名称
 	OperationsStaff  string `json:"operations_staff" gorm:"type:varchar(20)"` // 运营人员
 	TaskCount        uint8  `json:"task_count"`                               // 总任务量
 	CompletedCount   uint   `json:"completed_count"`                          // 完成任务量
