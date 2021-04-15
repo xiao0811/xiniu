@@ -488,23 +488,17 @@ func GetContractByStatus(c *gin.Context) {
 
 	switch r.Type {
 	case "newly": // 新签客户
-		fmt.Println("newly")
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort = 0")
 	case "inserve": // 服务中客户
-		fmt.Println("inserve")
-
 		sql.Where("delay_time >= ? AND cooperation_time <= ?", time.Now(), time.Now()).Where("refund IS NULL")
-	case "beexpire": // 即将断约
-		fmt.Println("beexpire")
 
+		sql.Find(&contracts)
+		fmt.Println(contracts)
+	case "beexpire": // 即将断约
 		sql.Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
 	case "renewal": // 续约客户
-		fmt.Println("renewal")
-
 		sql.Where("cooperation_time >= ? AND cooperation_time < ?", start, end).Where("sort > 0")
 	case "break": // 断约客户
-		fmt.Println("break")
-
 		if r.Date == time.Now().Format("2006-01") || r.Date == "" {
 			end = time.Now()
 		}
@@ -512,8 +506,6 @@ func GetContractByStatus(c *gin.Context) {
 			return db.Where("expire_time >= ? AND expire_time < ?", start, end)
 		}).Where("delay_time >= ? AND delay_time < ?", start, end).Where("refund IS NULL")
 	case "return": // 退款客户
-		fmt.Println("return")
-
 		sql.Where("refund >= ? AND refund < ?", start, end)
 	case "recycle": // 回收站
 	default:
