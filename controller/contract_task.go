@@ -188,13 +188,13 @@ func UpdateContractTask2(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
-	var td model.TaskDetails
+	var td model.ContractTask
 	if err := db.Where("id = ?", r.ID).First(&td).Error; err != nil {
-		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
+		handle.ReturnError(http.StatusBadRequest, "任务ID不存在", c)
 		return
 	}
 	if err := db.Updates(&r).Error; err != nil {
-		handle.ReturnError(http.StatusBadRequest, "门店更新失败", c)
+		handle.ReturnError(http.StatusBadRequest, "任务更新失败", c)
 		return
 	}
 
