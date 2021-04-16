@@ -79,14 +79,16 @@ func CreateContractTaskDetails(c *gin.Context) {
 
 // GetContractTasKDetails 获取合约任务详情
 func GetContractTasKDetails(c *gin.Context) {
-	var ct model.ContractTask
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
 	var td []model.TaskDetails
-	if err := c.ShouldBind(&ct); err != nil {
+	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
 
 	db := config.GetMysql()
-	db.Where("task_id = ?", ct.ContractID).Find(&td)
+	db.Where("task_id = ?", r.ID).Find(&td)
 	handle.ReturnSuccess("ok", td, c)
 }
