@@ -178,3 +178,25 @@ func GetContractTaskList(c *gin.Context) {
 
 	handle.ReturnSuccess("ok", data, c)
 }
+
+// UpdateContractTask2 更新合约任务
+func UpdateContractTask2(c *gin.Context) {
+	var r model.ContractTask
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	db := config.GetMysql()
+	var td model.TaskDetails
+	if err := db.Where("id = ?", r.ID).First(&td).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "客户ID不存在", c)
+		return
+	}
+	if err := db.Updates(&r).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "门店更新失败", c)
+		return
+	}
+
+	handle.ReturnSuccess("ok", r, c)
+}
