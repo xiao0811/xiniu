@@ -57,6 +57,8 @@ func CreateContractTask(c *gin.Context) {
 		Remark:          r.Remark,
 		Mediator:        r.Mediator,
 		StoreLink:       r.StoreLink,
+		Requirements:    r.Requirements,
+		Initial:         r.Initial,
 	}
 	if err := db.Create(&ct).Error; err != nil {
 		handle.ReturnError(http.StatusInternalServerError, "任务记录创建失败", c)
