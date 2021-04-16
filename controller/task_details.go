@@ -61,6 +61,8 @@ func CreateContractTaskDetails(c *gin.Context) {
 		}
 	}
 
+	task.Remark += "$" + r.Remark
+
 	err := db.Transaction(func(tx *gorm.DB) error {
 		tx.Create(&d)
 
@@ -90,5 +92,30 @@ func GetContractTasKDetails(c *gin.Context) {
 
 	db := config.GetMysql()
 	db.Where("task_id = ?", r.ID).Find(&td)
+	handle.ReturnSuccess("ok", td, c)
+}
+
+// DeleteContractTasKDetails 删除任务记录
+func DeleteContractTasKDetails(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var td model.TaskDetails
+	if err := db.Where("id = ?", r.ID).First(&td).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "任务记录ID错误", c)
+		return
+	}
+
+	if err := db.Delete(&td).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "任务记录ID删除失败", c)
+		return
+	}
+
 	handle.ReturnSuccess("ok", td, c)
 }

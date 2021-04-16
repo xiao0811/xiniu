@@ -12,6 +12,18 @@ import (
 	"github.com/xiao0811/xiniu/model"
 )
 
+var TaskType = map[uint16]string{
+	1:   "收藏",
+	2:   "浏览量",
+	4:   "团购卖量",
+	5:   "点赞",
+	7:   "预约",
+	8:   "访客",
+	3:   "小红书",
+	33:  "评价",
+	333: "笔记",
+}
+
 // CreateContractTask 添加合约任务记录
 func CreateContractTask(c *gin.Context) {
 	var r struct {
@@ -79,7 +91,7 @@ func CreateContractTask(c *gin.Context) {
 // DeleteContractTask 删除合约任务
 func DeleteContractTask(c *gin.Context) {
 	var r struct {
-		ID uint `json:"id"  binding:"required"`
+		ID uint `json:"id" binding:"required"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -199,4 +211,72 @@ func UpdateContractTask2(c *gin.Context) {
 	}
 
 	handle.ReturnSuccess("ok", r, c)
+}
+
+// ExportContractTask 导出合约列表
+func ExportContractTask(c *gin.Context) {
+	var r struct {
+		Type            uint8        `json:"type"`
+		ContractID      uint         `json:"contract_id"`
+		OperationsStaff string       `json:"operations_staff"`
+		StartTime       model.MyTime `json:"start_time"`
+		EndTime         model.MyTime `json:"end_time"`
+		Pagination      bool         `json:"pagination"`
+		Status          uint8        `json:"status"`
+	}
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	db := config.GetMysql()
+	sql := db
+	var cts []model.ContractTask
+	if r.Type != 0 {
+		sql = sql.Where("type = ?", r.Type)
+	}
+	if r.ContractID != 0 {
+		sql = sql.Where("contract_id = ?", r.ContractID)
+	}
+	if r.OperationsStaff != "" {
+		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
+	}
+
+	if r.Status != 0 {
+		sql = sql.Where("status = ?", r.Status)
+	}
+
+	if r.StartTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
+		sql = sql.Where("complete_time > ?", r.StartTime)
+	}
+
+	if r.EndTime.Format("2006-01-02 15:04:05") != "0001-01-01 00:00:00" {
+		sql = sql.Where("complete_time < ?", r.EndTime)
+	}
+
+	sql.Find(&cts)
+
+	head := []string{"下单日期", "运营名字", "门店", "下单项目", "门店链接", "安排数量",
+		"初始值", "完成值", "特殊要求", "反馈"}
+
+	var body [][]interface{}
+	for _, ct := range cts {
+		ctInfo := []interface{}{
+			ct.CreatedAt.Format("2006-01-02 15:04:05"), // 下单日期
+			ct.OperationsStaff,                         // 运营名字
+			ct.Member,                                  // 门店
+			TaskType[uint16(ct.Type)],                  // 下单项目
+			ct.StoreLink,                               // 门店链接
+			ct.CompletedCount,                          // 安排数量
+			// ct.Remark,                                  // 备注要求
+			ct.Initial,        // 初始值
+			ct.CompletedCount, // 完成值
+			ct.Requirements,   // 要求
+			ct.Images,         // 反馈
+		}
+		body = append(body, ctInfo)
+	}
+
+	filename := "任务列表" + time.Now().Format("20060102150405") + ".xlsx"
+	handle.ExcelExport(c, head, body, filename)
 }
