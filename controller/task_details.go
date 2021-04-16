@@ -87,6 +87,6 @@ func GetContractTasKDetails(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
-	db.Where("contract_id = ?", ct.ContractID).Find(&td)
+	db.Where("task_id = ?", ct.ContractID).Find(&td)
 	handle.ReturnSuccess("ok", td, c)
 }

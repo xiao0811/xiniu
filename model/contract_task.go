@@ -18,6 +18,6 @@ type ContractTask struct {
 	Images           string `json:"images"`                                   // 图片
 	Status           uint8  `json:"status"`                                   // 状态
 	Remark           string `json:"remark"`                                   // 备注
-	CreatedAT        MyTime `json:"created_at"`
+	CreatedAt        MyTime `json:"created_at"`
 	UpdatedAt        MyTime `json:"updated_at"`
 }
