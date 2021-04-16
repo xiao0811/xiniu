@@ -132,6 +132,7 @@ func GetContractTaskList(c *gin.Context) {
 		Page            int          `json:"page"`
 		Limit           int          `json:"limit"`
 		Status          uint8        `json:"status"`
+		Member          string       `json:"member"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -149,6 +150,10 @@ func GetContractTaskList(c *gin.Context) {
 	}
 	if r.OperationsStaff != "" {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
+	}
+
+	if r.Member != "" {
+		sql = sql.Where("member LIKE ?", "?"+r.Member+"")
 	}
 
 	if r.Status != 0 {
@@ -223,6 +228,7 @@ func ExportContractTask(c *gin.Context) {
 		EndTime         model.MyTime `json:"end_time"`
 		Pagination      bool         `json:"pagination"`
 		Status          uint8        `json:"status"`
+		Member          string       `json:"member"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
@@ -241,7 +247,9 @@ func ExportContractTask(c *gin.Context) {
 	if r.OperationsStaff != "" {
 		sql = sql.Where("operations_staff = ?", r.OperationsStaff)
 	}
-
+	if r.Member != "" {
+		sql = sql.Where("member LIKE ?", "?"+r.Member+"")
+	}
 	if r.Status != 0 {
 		sql = sql.Where("status = ?", r.Status)
 	}
