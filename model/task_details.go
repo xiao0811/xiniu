@@ -8,6 +8,6 @@ type TaskDetails struct {
 	Image     string `json:"image"`                          // 完成图片
 	Remark    string `json:"remark"`                         // 备注
 	DoneTime  string `json:"done_time" gorm:"type:char(10)"` // 完成时间 不做处理
-	CreatedAT MyTime `json:"created_at"`
+	CreatedAt MyTime `json:"created_at"`
 	UpdatedAt MyTime `json:"updated_at"`
 }

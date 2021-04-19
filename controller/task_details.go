@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -49,7 +50,11 @@ func CreateContractTaskDetails(c *gin.Context) {
 		Remark:    r.Remark,
 		DoneTime:  r.DoneTime,
 	}
+	var images []string
+	json.Unmarshal([]byte(task.Images), &images)
 
+	images = append(images, r.Image)
+	ij, _ := json.Marshal(images)
 	if contract.Type == 3 || contract.Type == 33 || contract.Type == 333 {
 		task.Status = 10
 	} else {
@@ -65,7 +70,7 @@ func CreateContractTaskDetails(c *gin.Context) {
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		tx.Create(&d)
-
+		task.Images = string(ij)
 		tx.Save(&task)
 
 		return nil
