@@ -221,7 +221,7 @@ func UpdateContractTask2(c *gin.Context) {
 // ExportContractTask 导出合约列表
 func ExportContractTask(c *gin.Context) {
 	var r struct {
-		Type            uint8        `json:"type"`
+		Type            []uint8      `json:"type"`
 		ContractID      uint         `json:"contract_id"`
 		OperationsStaff string       `json:"operations_staff"`
 		StartTime       model.MyTime `json:"start_time"`
@@ -238,8 +238,8 @@ func ExportContractTask(c *gin.Context) {
 	db := config.GetMysql()
 	sql := db
 	var cts []model.ContractTask
-	if r.Type != 0 {
-		sql = sql.Where("type = ?", r.Type)
+	if r.Type != nil {
+		sql = sql.Where("type IN ?", r.Type)
 	}
 	if r.ContractID != 0 {
 		sql = sql.Where("contract_id = ?", r.ContractID)
@@ -269,6 +269,16 @@ func ExportContractTask(c *gin.Context) {
 
 	var body [][]interface{}
 	for _, ct := range cts {
+		var pics []string
+		var images string
+		json.Unmarshal([]byte(ct.Images), &pics)
+
+		for _, pic := range pics {
+			if pic != "" {
+				pic = "http://8.136.135.212:8080"
+			}
+			images = images + "   " + pic
+		}
 		ctInfo := []interface{}{
 			ct.CreatedAt.Format("2006-01-02 15:04:05"), // 下单日期
 			ct.OperationsStaff,                         // 运营名字
@@ -276,11 +286,10 @@ func ExportContractTask(c *gin.Context) {
 			TaskType[uint16(ct.Type)],                  // 下单项目
 			ct.StoreLink,                               // 门店链接
 			ct.CompletedCount,                          // 安排数量
-			// ct.Remark,                                  // 备注要求
-			ct.Initial,        // 初始值
-			ct.CompletedCount, // 完成值
-			ct.Requirements,   // 要求
-			ct.Images,         // 反馈
+			ct.Initial,                                 // 初始值
+			ct.CompletedCount,                          // 完成值
+			ct.Requirements,                            // 要求
+			images,                                     // 反馈
 		}
 		body = append(body, ctInfo)
 	}
