@@ -275,7 +275,7 @@ func ExportContractTask(c *gin.Context) {
 
 		for _, pic := range pics {
 			if pic != "" {
-				pic = "http://8.136.135.212:8080"
+				pic = "http://8.136.135.212:8080" + pic
 			}
 			images = images + "   " + pic
 		}
