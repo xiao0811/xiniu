@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -274,7 +275,7 @@ func ExportContractTask(c *gin.Context) {
 		json.Unmarshal([]byte(ct.Images), &pics)
 
 		for _, pic := range pics {
-			if pic != "" {
+			if pic != "" && strings.Contains(pic, "http") {
 				pic = "http://8.136.135.212:8080" + pic
 			}
 			images = images + "   " + pic
