@@ -13,7 +13,7 @@ import (
 // CreateContractLog 新建合约记录
 func CreateContractLog(c *gin.Context) {
 	var r struct {
-		ContratID    uint   `json:"contrat_id"`    // 合约ID
+		ContractID   uint   `json:"contrat_id"`    // 合约ID
 		OperatorID   uint   `json:"operator_id"`   // 操作人员ID
 		Operator     string `json:"operator"`      // 操作人员名字
 		Type         uint8  `json:"type"`          // 类型: 1 牌级 2 推广通
@@ -31,7 +31,7 @@ func CreateContractLog(c *gin.Context) {
 	db := config.GetMysql()
 
 	cl := model.ContratLog{
-		ContratID:     r.ContratID,
+		ContractID:    r.ContractID,
 		OperatorID:    r.OperatorID,
 		Operator:      r.Operator,
 		Type:          r.Type,
@@ -90,6 +90,6 @@ func GetLogsByContratID(c *gin.Context) {
 	db := config.GetMysql()
 	var cls []model.ContratLog
 
-	db.Where("contrat_id = ?", r.ID).Find(&cls)
+	db.Where("contract_id = ?", r.ID).Find(&cls)
 	handle.ReturnSuccess("ok", cls, c)
 }
