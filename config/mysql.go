@@ -32,6 +32,7 @@ func init() {
 		&model.ContractTask{},
 		&model.Refund{},
 		&model.TaskDetails{},
+		&model.ContratLog{},
 	)
 }
 
