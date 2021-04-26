@@ -130,5 +130,14 @@ func GetRouter() *gin.Engine {
 		home.POST("/my_contract", controller.MyContract)
 		home.POST("/30_days_service", controller.ServiceDays30)
 	}
+
+	cls := token.Group("/contract_log")
+	{
+		// 创建合约操作记录
+		cls.POST("/create", controller.CreateContractLog)
+		// 删除合约操作记录
+		cls.POST("/delate", controller.DeleteContractLog)
+		cls.POST("/get_logs_by_contrat_id", controller.GetLogsByContratID)
+	}
 	return app
 }
