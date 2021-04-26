@@ -477,7 +477,7 @@ func GetContractByStatus(c *gin.Context) {
 	}
 
 	var contracts []model.Contract
-	sql := db.Preload("Member").Where("status = 1")
+	sql := db.Preload("Member").Preload("ContractLogs").Where("status = 1")
 	log.Println(names, userID)
 	if user.Duty == 2 { // 运营
 		sql = sql.Where("operations_staff IN ?", names)

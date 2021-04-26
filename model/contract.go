@@ -40,7 +40,7 @@ type Contract struct {
 	BuildPage                string         `json:"build_page"`
 	IsBuild                  bool           `json:"is_build"`
 	InitialLevel             uint8          `json:"initial_level"`
-	// ContractLogs             []ContratLog   `json:"contract_logs"`
-	CreatedAt MyTime `json:"created_at"`
-	UpdatedAt MyTime `json:"updated_at"`
+	ContractLogs             []ContractLog  `json:"contract_logs"`
+	CreatedAt                MyTime         `json:"created_at"`
+	UpdatedAt                MyTime         `json:"updated_at"`
 }
