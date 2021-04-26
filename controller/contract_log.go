@@ -13,7 +13,7 @@ import (
 // CreateContractLog 新建合约记录
 func CreateContractLog(c *gin.Context) {
 	var r struct {
-		ContractID   uint   `json:"contrat_id"`    // 合约ID
+		ContractID   uint   `json:"contract_id"`   // 合约ID
 		OperatorID   uint   `json:"operator_id"`   // 操作人员ID
 		Operator     string `json:"operator"`      // 操作人员名字
 		Type         uint8  `json:"type"`          // 类型: 1 牌级 2 推广通
