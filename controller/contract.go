@@ -40,6 +40,9 @@ func CreateContract(c *gin.Context) {
 		IncludeDetailsPage       bool    `json:"include_details_page"`        // 是否包含详情页
 		Remarks                  string  `json:"remarks"`                     // 备注
 		ContractData             string  `json:"contract_data"`               // 附加备注
+		BuildPage                string  `json:"build_page"`
+		IsBuild                  bool    `json:"is_build"`
+		InitialLevel             uint8   `json:"initial_level"`
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
@@ -109,6 +112,9 @@ func CreateContract(c *gin.Context) {
 		Status:                   0,
 		Sort:                     sort,
 		ContractData:             r.ContractData,
+		BuildPage:                r.BuildPage,
+		IsBuild:                  r.IsBuild,
+		InitialLevel:             r.InitialLevel,
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {

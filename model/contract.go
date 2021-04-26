@@ -37,6 +37,9 @@ type Contract struct {
 	Reason                   string         `json:"reason"` // 审核备注
 	Sort                     int64          `json:"sort"`
 	ContractData             string         `json:"contract_data"` // 附加备注
+	BuildPage                string         `json:"build_page"`
+	IsBuild                  bool           `json:"is_build"`
+	InitialLevel             uint8          `json:"initial_level"`
 	CreatedAt                MyTime         `json:"created_at"`
 	UpdatedAt                MyTime         `json:"updated_at"`
 }
