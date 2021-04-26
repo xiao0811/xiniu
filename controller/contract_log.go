@@ -30,7 +30,7 @@ func CreateContractLog(c *gin.Context) {
 
 	db := config.GetMysql()
 
-	cl := model.ContratLog{
+	cl := model.ContractLog{
 		ContractID:    r.ContractID,
 		OperatorID:    r.OperatorID,
 		Operator:      r.Operator,
@@ -62,7 +62,7 @@ func DeleteContractLog(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
-	var cl model.ContratLog
+	var cl model.ContractLog
 	if err := db.Where("id = ?", r.ID).First(&cl).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "合约操作记录不存在", c)
 		return
@@ -88,7 +88,7 @@ func GetLogsByContratID(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
-	var cls []model.ContratLog
+	var cls []model.ContractLog
 
 	db.Where("contract_id = ?", r.ID).Find(&cls)
 	handle.ReturnSuccess("ok", cls, c)

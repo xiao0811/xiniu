@@ -1,6 +1,6 @@
 package model
 
-type ContratLog struct {
+type ContractLog struct {
 	ID            uint   `gorm:"primarykey" json:"id" binding:"required"`
 	ContractID    uint   `json:"contract_id"`    // 合约ID
 	OperatorID    uint   `json:"operator_id"`    // 操作人员ID
