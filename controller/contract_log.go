@@ -29,8 +29,13 @@ func CreateContractLog(c *gin.Context) {
 	}
 
 	db := config.GetMysql()
-
-	cl := model.ContractLog{
+	var cl model.ContractLog
+	db.Where("contract_id = ? AND week = ?", r.ContractID, r.Week).First(&cl)
+	if cl.ID != 0 {
+		handle.ReturnError(http.StatusInternalServerError, "本周合约记录已存在", c)
+		return
+	}
+	cl = model.ContractLog{
 		ContractID:    r.ContractID,
 		OperatorID:    r.OperatorID,
 		Operator:      r.Operator,
