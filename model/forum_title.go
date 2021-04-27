@@ -16,7 +16,7 @@ type ForumTitle struct {
 	Images           string         `json:"images"`                            // 图片
 	Label            uint           `json:"label"`                             // 标签
 	IsCarousel       bool           `json:"is_carousel"`                       // 是否轮播
-	Comment          []ForumComment `json:"comment" gorm:"references:TitleID"` // 评论
+	Comment          []ForumComment `json:"comment" gorm:"foreignKey:TitleID"` // 评论
 	CreatedAt        MyTime         `json:"created_at"`
 	UpdatedAt        MyTime         `json:"updated_at"`
 }
