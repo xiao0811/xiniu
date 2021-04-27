@@ -15,6 +15,7 @@ type ForumTitle struct {
 	Contract         uint           `json:"contract"`                          // 关联合约
 	Images           string         `json:"images"`                            // 图片
 	Label            uint           `json:"label"`                             // 标签
+	LabelText        string         `json:"label_text"`                        // 标签文本
 	IsCarousel       bool           `json:"is_carousel"`                       // 是否轮播
 	Comment          []ForumComment `json:"comment" gorm:"foreignKey:TitleID"` // 评论
 	CreatedAt        MyTime         `json:"created_at"`

@@ -22,6 +22,7 @@ func CreateTitle(c *gin.Context) {
 		Contract         uint   `json:"contract"`                 // 关联合约
 		Images           string `json:"images"`                   // 图片
 		Label            uint   `json:"label"`                    // 标签
+		LabelText        string `json:"label_text"`               // 标签文本
 		IsCarousel       bool   `json:"is_carousel"`              // 是否轮播
 	}
 
@@ -42,6 +43,7 @@ func CreateTitle(c *gin.Context) {
 		Images:         r.Images,
 		Label:          r.Label,
 		IsCarousel:     r.IsCarousel,
+		LabelText:      r.LabelText,
 	}
 
 	if err := db.Create(&ft).Error; err != nil {
