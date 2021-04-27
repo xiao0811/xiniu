@@ -104,8 +104,11 @@ func DeleteTitle(c *gin.Context) {
 // GetTitleList 获取主题列表
 func GetTitleList(c *gin.Context) {
 	var r struct {
-		Type  uint8 `json:"type"`
-		Label uint  `json:"label"`
+		Type  uint8  `json:"type"`
+		Label uint   `json:"label"`
+		Order string `json:"order"`
+		Page  uint8  `json:"page"`
+		Limit uint8  `json:"limit"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -114,6 +117,10 @@ func GetTitleList(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var fts []model.ForumTitle
+
+	var count int64
+	var pages uint8
+
 	sql := db
 	if r.Type != 0 {
 		sql = sql.Where("type = ?", r.Type)
@@ -123,9 +130,28 @@ func GetTitleList(c *gin.Context) {
 		sql = sql.Where("label = ?", r.Label)
 	}
 
-	sql.Order("id").Find(&fts)
+	if r.Order != "" {
+		sql = sql.Order(r.Order + " desc")
+	} else {
+		sql = sql.Order("id desc")
+	}
+	var page uint8
+	_count := sql
+	_count.Find(&fts).Count(&count)
 
-	handle.ReturnSuccess("ok", fts, c)
+	if r.Page == 0 {
+		page = 1
+	} else {
+		page = r.Page
+	}
+	sql.Limit(10).Offset((int(page) - 1) * 10).Find(&fts)
+
+	if int(count)%10 != 0 {
+		pages = uint8(count)/10 + 1
+	} else {
+		pages = uint8(count) / 10
+	}
+	handle.ReturnSuccess("ok", gin.H{"cts": fts, "pages": pages, "currPage": page}, c)
 }
 
 // TitleDetails 获取主题详情
