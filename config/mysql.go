@@ -33,6 +33,9 @@ func init() {
 		&model.Refund{},
 		&model.TaskDetails{},
 		&model.ContractLog{},
+		&model.ForumTitle{},
+		&model.ForumComment{},
+		&model.ForumLike{},
 	)
 }
 

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/controller"
+	"github.com/xiao0811/xiniu/controller/forum"
 	"github.com/xiao0811/xiniu/controller/label"
 	"github.com/xiao0811/xiniu/middleware"
 )
@@ -138,6 +139,32 @@ func GetRouter() *gin.Engine {
 		// 删除合约操作记录
 		cls.POST("/delate", controller.DeleteContractLog)
 		cls.POST("/get_logs_by_contrat_id", controller.GetLogsByContratID)
+	}
+
+	// 论坛主题
+	ft := token.Group("/forum_title")
+	{
+		// 新建主题
+		ft.POST("/create", forum.CreateTitle)
+		ft.POST("/update", forum.UpdateTitle)
+		ft.POST("/delete", forum.DeleteTitle)
+		ft.POST("/get_title_list", forum.GetTitleList)
+		ft.POST("/details", forum.TitleDetails)
+	}
+
+	// 论坛评论
+	fc := token.Group("/forum_comment")
+	{
+		fc.POST("/create", forum.CreateComment)
+		fc.POST("/update", forum.UpdateComment)
+		fc.POST("/delete", forum.DeleteComment)
+	}
+
+	// 点赞
+	like := token.Group("/forum_like")
+	{
+		like.POST("/like", forum.Like)
+		like.POST("/unlike", forum.Unlike)
 	}
 	return app
 }
