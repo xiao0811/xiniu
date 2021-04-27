@@ -101,10 +101,27 @@ func DeleteTitle(c *gin.Context) {
 
 // GetTitleList 获取主题列表
 func GetTitleList(c *gin.Context) {
-	var fts []model.ForumTitle
+	var r struct {
+		Type  uint8 `json:"type"`
+		Label uint  `json:"label"`
+	}
 
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
 	db := config.GetMysql()
-	db.Order("id desc").Find(&fts)
+	var fts []model.ForumTitle
+	sql := db
+	if r.Type != 0 {
+		sql = sql.Where("type = ?", r.Type)
+	}
+
+	if r.Label != 0 {
+		sql = sql.Where("label = ?", r.Label)
+	}
+
+	sql.Order("id").Find(&fts)
 
 	handle.ReturnSuccess("ok", fts, c)
 }
