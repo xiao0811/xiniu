@@ -157,7 +157,7 @@ func GetTitleList(c *gin.Context) {
 // TitleDetails 获取主题详情
 func TitleDetails(c *gin.Context) {
 	var r struct {
-		ID uint `gorm:"primarykey" json:"id" binding:"required"`
+		ID uint `json:"id" binding:"required"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -167,7 +167,7 @@ func TitleDetails(c *gin.Context) {
 	db := config.GetMysql()
 	var ft model.ForumTitle
 
-	if err := db.Where("id = ?", r.ID).Preload("Comment").First(&ft).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).Preload("Comment").First(&ft).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "主题ID不存在", c)
 		return
 	}
