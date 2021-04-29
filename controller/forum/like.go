@@ -59,7 +59,7 @@ func Unlike(c *gin.Context) {
 	db := config.GetMysql()
 	var l model.ForumLike
 	var f model.ForumTitle
-	if err := db.Where("title_id = ? AND operator_id = ? AND status = ture").First(&l).Error; err != nil {
+	if err := db.Where("title_id = ? AND operator_id = ? AND status = 1", r.TitleID, r.OperatorID).First(&l).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "未点赞改主题", c)
 		return
 	}
