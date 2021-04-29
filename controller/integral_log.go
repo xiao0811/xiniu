@@ -47,19 +47,25 @@ func CommentAdoption(c *gin.Context) {
 	}
 	db := config.GetMysql()
 	var comment model.ForumComment
-	// var title model.ForumTitle
+	var title model.ForumTitle
 	if err := db.Where("id = ?", r.CommentID).First(&comment).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "该条评论不存在", c)
 		return
 	}
+
 	var quantity uint8 = 2
 	if r.Quantity != 0 {
 		quantity = r.Quantity
 	}
+	db.Where("id = ?", comment.TitleID).First(&title)
+	title.GivenIntegral += quantity
+	if title.GivenIntegral > title.TotalIntegral {
+		handle.ReturnError(http.StatusBadRequest, "所给积分超出上限", c)
+		return
+	}
 	comment.Adoption = true
 	db.Save(&comment)
 	integralChange(comment.OperatorID, quantity, "评论被采纳", true)
-	// db.Where("id = ?", comment.TitleID).First(&title)
 }
 
 func integralChange(user_id uint, quantity uint8, remark string, is_increase bool) error {
