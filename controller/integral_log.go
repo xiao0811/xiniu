@@ -126,7 +126,7 @@ func (s Ranks) Len() int {
 
 // Less():成绩将有低到高排序
 func (s Ranks) Less(i, j int) bool {
-	return s[i].Integral < s[j].Integral
+	return s[i].Integral > s[j].Integral
 }
 
 // Swap()
