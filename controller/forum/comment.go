@@ -14,7 +14,7 @@ func CreateComment(c *gin.Context) {
 	var r struct {
 		TitleID    uint   `json:"title_id"`    // 主题ID
 		Content    string `json:"content"`     // 评论内容
-		OperatorID string `json:"operator_id"` // 发表者ID
+		OperatorID uint   `json:"operator_id"` // 发表者ID
 		Operator   string `json:"operator"`    // 发表者
 		Reply      uint   `json:"reply"`       // 回复楼层
 	}

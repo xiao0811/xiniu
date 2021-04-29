@@ -159,6 +159,7 @@ func GetRouter() *gin.Engine {
 		fc.POST("/create", forum.CreateComment)
 		fc.POST("/update", forum.UpdateComment)
 		fc.POST("/delete", forum.DeleteComment)
+		fc.POST("/adoption", controller.CommentAdoption)
 	}
 
 	// 点赞
