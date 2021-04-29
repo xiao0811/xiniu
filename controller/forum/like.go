@@ -13,7 +13,7 @@ import (
 func Like(c *gin.Context) {
 	var r struct {
 		TitleID    uint   `json:"title_id" binding:"required"`
-		OperatorID string `json:"operator_id" binding:"required"`
+		OperatorID uint   `json:"operator_id" binding:"required"`
 		Operator   string `json:"operator"`
 	}
 

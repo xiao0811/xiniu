@@ -13,4 +13,4 @@ type ForumComment struct {
 	UpdatedAt  MyTime `json:"updated_at"`
 }
 
-// alter table forum_comments modify column operator_id bigint unsigned
+// alter table forum_likes modify column operator_id bigint unsigned
