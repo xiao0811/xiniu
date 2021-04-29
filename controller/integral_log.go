@@ -37,7 +37,8 @@ func IntegralChange(c *gin.Context) {
 // CommentAdoption 评论被采纳
 func CommentAdoption(c *gin.Context) {
 	var r struct {
-		CommentID uint `json:"comment_id" binding:"required"`
+		CommentID uint  `json:"comment_id" binding:"required"`
+		Quantity  uint8 `json:"quantity"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -51,9 +52,13 @@ func CommentAdoption(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "该条评论不存在", c)
 		return
 	}
+	var quantity uint8 = 2
+	if r.Quantity != 0 {
+		quantity = r.Quantity
+	}
 	comment.Adoption = true
 	db.Save(&comment)
-	integralChange(comment.OperatorID, 2, "评论被采纳", true)
+	integralChange(comment.OperatorID, quantity, "评论被采纳", true)
 	// db.Where("id = ?", comment.TitleID).First(&title)
 }
 
