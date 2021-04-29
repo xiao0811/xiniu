@@ -203,3 +203,26 @@ func GetForumTitleByUser(c *gin.Context) {
 
 	handle.ReturnSuccess("ok", fts, c)
 }
+
+// CarouselOrRecommended 推荐 / 轮播
+func CarouselOrRecommended(c *gin.Context) {
+	var r struct {
+		Type string `json:"type" binding:"required"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+
+	db := config.GetMysql()
+	var titles []model.ForumTitle
+
+	if r.Type == "carousel" {
+		db = db.Where("carousel = 1")
+	} else if r.Type == "recommended" {
+		db = db.Where("recommended = 1")
+	}
+	db.Preload("Comment").Preload("Likes").Order("created_at DESC").Find(&titles)
+	handle.ReturnSuccess("ok", titles, c)
+}

@@ -151,6 +151,7 @@ func GetRouter() *gin.Engine {
 		ft.POST("/get_title_list", forum.GetTitleList)
 		ft.POST("/details", forum.TitleDetails)
 		ft.POST("/get_title_by_user", forum.GetForumTitleByUser)
+		ft.POST("/carousel_or_recommended", forum.CarouselOrRecommended)
 	}
 
 	// 论坛评论
