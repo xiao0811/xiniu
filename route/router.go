@@ -173,6 +173,7 @@ func GetRouter() *gin.Engine {
 	integra := token.Group("/integra")
 	{
 		integra.POST("/change", controller.IntegralChange)
+		integra.POST("/rank", controller.IntegralRank)
 	}
 	return app
 }

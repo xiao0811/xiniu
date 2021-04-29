@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiao0811/xiniu/config"
@@ -82,4 +83,53 @@ func integralChange(user_id uint, quantity uint8, remark string, is_increase boo
 
 	db := config.GetMysql()
 	return db.Create(&ic).Error
+}
+
+type Rank struct {
+	Name     string `json:"name"`
+	Integral uint8  `json:"integral"`
+}
+
+type Ranks []Rank
+
+func IntegralRank(c *gin.Context) {
+	var users []model.User
+	var ranks Ranks
+	db := config.GetMysql()
+	db.Where("duty = 2").Find(&users)
+	for _, user := range users {
+		var integrals []model.IntegralLog
+		db.Where("user_id = ?", user.ID).Find(&integrals)
+		var total uint8
+		for _, integral := range integrals {
+
+			if integral.IsIncrease {
+				total += integral.Quantity
+			} else {
+				total -= integral.Quantity
+			}
+		}
+
+		ranks = append(ranks, Rank{
+			Name:     user.RealName,
+			Integral: total,
+		})
+	}
+	sort.Sort(ranks)
+	handle.ReturnSuccess("ok", ranks, c)
+}
+
+// Len()
+func (s Ranks) Len() int {
+	return len(s)
+}
+
+// Less():成绩将有低到高排序
+func (s Ranks) Less(i, j int) bool {
+	return s[i].Integral < s[j].Integral
+}
+
+// Swap()
+func (s Ranks) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
