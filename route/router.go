@@ -150,6 +150,7 @@ func GetRouter() *gin.Engine {
 		ft.POST("/delete", forum.DeleteTitle)
 		ft.POST("/get_title_list", forum.GetTitleList)
 		ft.POST("/details", forum.TitleDetails)
+		ft.POST("/get_title_by_user", forum.GetForumTitleByUser)
 	}
 
 	// 论坛评论

@@ -33,17 +33,18 @@ func CreateTitle(c *gin.Context) {
 	db := config.GetMysql()
 
 	ft := model.ForumTitle{
-		Title:          r.Title,
-		Content:        r.Content,
-		Type:           r.Type,
-		Recommended:    r.Recommended,
-		TotalIntegral:  r.TotalIntegral,
-		OriginalPoster: r.OriginalPoster,
-		Contract:       r.Contract,
-		Images:         r.Images,
-		Label:          r.Label,
-		IsCarousel:     r.IsCarousel,
-		LabelText:      r.LabelText,
+		Title:            r.Title,
+		Content:          r.Content,
+		Type:             r.Type,
+		Recommended:      r.Recommended,
+		TotalIntegral:    r.TotalIntegral,
+		OriginalPoster:   r.OriginalPoster,
+		Contract:         r.Contract,
+		Images:           r.Images,
+		Label:            r.Label,
+		IsCarousel:       r.IsCarousel,
+		LabelText:        r.LabelText,
+		OriginalPosterID: r.OriginalPosterID,
 	}
 
 	if err := db.Create(&ft).Error; err != nil {
@@ -104,6 +105,7 @@ func DeleteTitle(c *gin.Context) {
 // GetTitleList 获取主题列表
 func GetTitleList(c *gin.Context) {
 	var r struct {
+		Title string `json:"title"`
 		Type  uint8  `json:"type"`
 		Label uint   `json:"label"`
 		Order string `json:"order"`
@@ -122,6 +124,11 @@ func GetTitleList(c *gin.Context) {
 	var pages uint8
 
 	sql := db
+
+	if r.Title != "" {
+		sql = sql.Where("title LIKE ?", "%"+r.Title+"%")
+	}
+
 	if r.Type != 0 {
 		sql = sql.Where("type = ?", r.Type)
 	}
@@ -176,4 +183,23 @@ func TitleDetails(c *gin.Context) {
 	db.Save(&ft)
 
 	handle.ReturnSuccess("ok", ft, c)
+}
+
+// GetForumTitleByUser 根据用户ID查发表记录
+func GetForumTitleByUser(c *gin.Context) {
+	var r struct {
+		ID uint `json:"id" binding:"required"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+
+	var fts []model.ForumTitle
+
+	db := config.GetMysql()
+	db.Where("original_poster_id = ?", r.ID).Order("id desc").Find(&fts)
+
+	handle.ReturnSuccess("ok", fts, c)
 }

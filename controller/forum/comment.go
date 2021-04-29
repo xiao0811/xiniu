@@ -75,7 +75,7 @@ func DeleteComment(c *gin.Context) {
 
 	db := config.GetMysql()
 	var fc model.ForumComment
-	if err := db.Where("id = ?", r.ID).First(&fc).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&fc).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "该条评论不存在", c)
 		return
 	}
