@@ -219,7 +219,7 @@ func CarouselOrRecommended(c *gin.Context) {
 	var titles []model.ForumTitle
 
 	if r.Type == "carousel" {
-		db = db.Where("carousel = 1")
+		db = db.Where("is_carousel = 1")
 	} else if r.Type == "recommended" {
 		db = db.Where("recommended = 1")
 	}

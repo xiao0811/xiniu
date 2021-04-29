@@ -62,7 +62,7 @@ func UpdateComment(c *gin.Context) {
 	handle.ReturnSuccess("ok", fc, c)
 }
 
-// DeleteComment 删除品论
+// DeleteComment 删除评论
 func DeleteComment(c *gin.Context) {
 	var r struct {
 		ID uint `gorm:"primarykey" json:"id" binding:"required"`
