@@ -24,7 +24,7 @@ func Like(c *gin.Context) {
 	db := config.GetMysql()
 	var l model.ForumLike
 	var f model.ForumTitle
-	if err := db.Where("title_id = ? AND operator_id = ? AND status = ture").First(&l).Error; err == nil {
+	if err := db.Where("title_id = ? AND operator_id = ? AND status = 1").First(&l).Error; err == nil {
 		handle.ReturnError(http.StatusBadRequest, "已赞改主题", c)
 		return
 	}
@@ -35,6 +35,12 @@ func Like(c *gin.Context) {
 		Operator:   r.Operator,
 		Status:     true,
 	}
+
+	if err := db.Where("id = ?", r.TitleID).First(&f).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "点赞主题不存在", c)
+		return
+	}
+
 	if err := db.Create(&ll).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "点赞失败", c)
 		return
