@@ -168,5 +168,11 @@ func GetRouter() *gin.Engine {
 		like.POST("/like", forum.Like)
 		like.POST("/unlike", forum.Unlike)
 	}
+
+	// 积分
+	integra := token.Group("/integra")
+	{
+		integra.POST("/change", controller.IntegralChange)
+	}
 	return app
 }
