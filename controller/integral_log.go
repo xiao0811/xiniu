@@ -59,12 +59,14 @@ func CommentAdoption(c *gin.Context) {
 	}
 	db.Where("id = ?", comment.TitleID).First(&title)
 	title.GivenIntegral += quantity
+	comment.Integral = quantity
 	if title.GivenIntegral > title.TotalIntegral {
 		handle.ReturnError(http.StatusBadRequest, "所给积分超出上限", c)
 		return
 	}
 	comment.Adoption = true
 	db.Save(&comment)
+	db.Save(&title)
 	integralChange(comment.OperatorID, quantity, "评论被采纳", true)
 }
 
