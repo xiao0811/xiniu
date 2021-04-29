@@ -18,6 +18,7 @@ type ForumTitle struct {
 	LabelText        string         `json:"label_text"`                        // 标签文本
 	IsCarousel       bool           `json:"is_carousel"`                       // 是否轮播
 	Comment          []ForumComment `json:"comment" gorm:"foreignKey:TitleID"` // 评论
+	Likes            []ForumLike    `json:"likes" gorm:"foreignKey:TitleID"`   // 点赞
 	CreatedAt        MyTime         `json:"created_at"`
 	UpdatedAt        MyTime         `json:"updated_at"`
 }
