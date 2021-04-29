@@ -68,6 +68,8 @@ func CommentAdoption(c *gin.Context) {
 	db.Save(&comment)
 	db.Save(&title)
 	integralChange(comment.OperatorID, quantity, "评论被采纳", true)
+
+	handle.ReturnSuccess("ok", title, c)
 }
 
 func integralChange(user_id uint, quantity uint8, remark string, is_increase bool) error {
