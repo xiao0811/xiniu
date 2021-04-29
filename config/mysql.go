@@ -36,6 +36,7 @@ func init() {
 		&model.ForumTitle{},
 		&model.ForumComment{},
 		&model.ForumLike{},
+		&model.IntegralLog{},
 	)
 }
 
