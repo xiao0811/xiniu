@@ -36,7 +36,7 @@ func Like(c *gin.Context) {
 		Status:     true,
 	}
 
-	if err := db.Where("id = ?", r.TitleID).First(&f).Error; err == nil {
+	if err := db.Where("id = ?", r.TitleID).First(&f).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "点赞主题不存在", c)
 		return
 	}
@@ -69,6 +69,11 @@ func Unlike(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "未点赞改主题", c)
 		return
 	}
+	if err := db.Where("id = ?", r.TitleID).First(&f).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "点赞主题不存在", c)
+		return
+	}
+
 	l.Status = false
 	f.Like--
 	db.Save(&l)
