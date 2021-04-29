@@ -48,7 +48,7 @@ func CommentAdoption(c *gin.Context) {
 	db := config.GetMysql()
 	var comment model.ForumComment
 	var title model.ForumTitle
-	if err := db.Where("id = ?", r.CommentID).First(&comment).Error; err == nil {
+	if err := db.Where("id = ?", r.CommentID).First(&comment).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "该条评论不存在", c)
 		return
 	}
