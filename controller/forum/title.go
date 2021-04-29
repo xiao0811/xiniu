@@ -123,7 +123,7 @@ func GetTitleList(c *gin.Context) {
 	var count int64
 	var pages uint8
 
-	sql := db.Preload("Comment")
+	sql := db.Preload("Comment").Preload("Likes")
 
 	if r.Title != "" {
 		sql = sql.Where("title LIKE ?", "%"+r.Title+"%")
