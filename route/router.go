@@ -177,9 +177,21 @@ func GetRouter() *gin.Engine {
 		integra.POST("/rank", controller.IntegralRank)
 	}
 
+	// 站内信
 	stationLetter := token.Group("/station_letter")
 	{
 		stationLetter.POST("/create", controller.CreateStationLetter)
+	}
+
+	// 组队
+	team := token.Group("/team")
+	{
+		// 创建队伍
+		team.POST("/create", controller.CreateTeam)
+		// 编辑队伍
+		team.POST("/update", controller.UpdateTeam)
+		// 获取组队积分
+		team.POST("/team_rank", controller.GetTeamRank)
 	}
 	return app
 }

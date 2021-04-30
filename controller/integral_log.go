@@ -86,13 +86,21 @@ func integralChange(user_id uint, quantity uint8, remark string, is_increase boo
 }
 
 type Rank struct {
+	ID       uint   `json:"id"`
 	Name     string `json:"name"`
 	Integral uint8  `json:"integral"`
 }
 
 type Ranks []Rank
 
+// IntegralRank 获取积分排名
 func IntegralRank(c *gin.Context) {
+	ranks := GetIntegral()
+	handle.ReturnSuccess("ok", ranks, c)
+}
+
+// getIntegral 积分排名
+func GetIntegral() Ranks {
 	var users []model.User
 	var ranks Ranks
 	db := config.GetMysql()
@@ -111,12 +119,13 @@ func IntegralRank(c *gin.Context) {
 		}
 
 		ranks = append(ranks, Rank{
+			ID:       user.ID,
 			Name:     user.RealName,
 			Integral: total,
 		})
 	}
 	sort.Sort(ranks)
-	handle.ReturnSuccess("ok", ranks, c)
+	return ranks
 }
 
 // Len()
