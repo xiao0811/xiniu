@@ -64,7 +64,7 @@ func UpdateTitle(c *gin.Context) {
 	db := config.GetMysql()
 
 	var ft model.ForumTitle
-	if err := db.Where("id = ?", r.ID).First(&ft).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&ft).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "主题ID不存在", c)
 		return
 	}
@@ -89,7 +89,7 @@ func DeleteTitle(c *gin.Context) {
 	db := config.GetMysql()
 	var ft model.ForumTitle
 
-	if err := db.Where("id = ?", r.ID).First(&ft).Error; err == nil {
+	if err := db.Where("id = ?", r.ID).First(&ft).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "主题ID不存在", c)
 		return
 	}
