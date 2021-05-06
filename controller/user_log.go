@@ -38,7 +38,7 @@ func GetUserLogs(c *gin.Context) {
 		sql = sql.Where("contract = ?", r.Action)
 	}
 
-	if err := db.Order("id desc").Find(&logs).Error; err != nil {
+	if err := sql.Order("id desc").Find(&logs).Error; err != nil {
 		handle.ReturnError(http.StatusBadRequest, "暂无记录", c)
 		return
 	}

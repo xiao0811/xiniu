@@ -205,7 +205,7 @@ func UserList(c *gin.Context) {
 	var user model.User
 	db.Where("id = ?", token.UserID).First(&user)
 	var _users []model.User
-	var names []string
+	// var names []string
 	var userID []uint
 	_sql := db.Where("status = 1")
 	if user.Duty > 1 {
@@ -222,7 +222,7 @@ func UserList(c *gin.Context) {
 	_sql.Find(&_users)
 
 	for _, u := range _users {
-		names = append(names, u.RealName)
+		// names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
 
@@ -330,4 +330,24 @@ func GetMember(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "", c)
 	}
 	handle.ReturnSuccess("ok", members, c)
+}
+
+// UserListAll 获取用户信息
+func UserListAll(c *gin.Context) {
+	var r struct {
+		MarshallingID uint8 `json:"marshalling_id"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var users []model.User
+	if r.MarshallingID != 0 {
+		db = db.Where("marshalling = ?", r.MarshallingID)
+	}
+
+	db.Find(&users)
+	handle.ReturnSuccess("ok", users, c)
 }

@@ -147,7 +147,7 @@ func MemberList(c *gin.Context) {
 	var user model.User
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
-	var names []string
+	// var names []string
 	var userID []uint
 	_sql := db.Where("status = 1")
 	if user.Duty > 1 {
@@ -164,7 +164,7 @@ func MemberList(c *gin.Context) {
 	_sql.Find(&users)
 
 	for _, u := range users {
-		names = append(names, u.RealName)
+		// names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
 
@@ -347,7 +347,7 @@ func ExportMembers(c *gin.Context) {
 	var user model.User
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
-	var names []string
+	// var names []string
 	var userID []uint
 	_sql := db.Where("status = 1")
 	if user.Duty > 1 {
@@ -364,7 +364,7 @@ func ExportMembers(c *gin.Context) {
 	_sql.Find(&users)
 
 	for _, u := range users {
-		names = append(names, u.RealName)
+		// names = append(names, u.RealName)
 		userID = append(userID, u.ID)
 	}
 

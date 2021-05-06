@@ -177,7 +177,7 @@ func ContractList(c *gin.Context) {
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
-	var userID []uint
+	// var userID []uint
 	_sql := db.Where("status = 1")
 	if user.Duty > 1 {
 		_sql.Where("duty = ?", user.Duty)
@@ -194,7 +194,7 @@ func ContractList(c *gin.Context) {
 
 	for _, u := range users {
 		names = append(names, u.RealName)
-		userID = append(userID, u.ID)
+		// userID = append(userID, u.ID)
 	}
 
 	var contracts []model.Contract
