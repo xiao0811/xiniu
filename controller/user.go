@@ -336,6 +336,7 @@ func GetMember(c *gin.Context) {
 func UserListAll(c *gin.Context) {
 	var r struct {
 		MarshallingID uint8 `json:"marshalling_id"`
+		DutyID        uint8 `json:"duty_id"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -345,7 +346,11 @@ func UserListAll(c *gin.Context) {
 	db := config.GetMysql()
 	var users []model.User
 	if r.MarshallingID != 0 {
-		db = db.Where("marshalling = ?", r.MarshallingID)
+		db = db.Where("marshalling_id = ?", r.MarshallingID)
+	}
+
+	if r.DutyID != 0 {
+		db = db.Where("duty = ?", r.DutyID)
 	}
 
 	db.Find(&users)
