@@ -191,6 +191,8 @@ func GetRouter() *gin.Engine {
 		team.POST("/create", controller.CreateTeam)
 		// 编辑队伍
 		team.POST("/update", controller.UpdateTeam)
+		//  删除分组
+		team.POST("/delete", controller.DeleteTeam)
 		// 获取组队积分
 		team.POST("/team_rank", controller.GetTeamRank)
 		// 获取队伍

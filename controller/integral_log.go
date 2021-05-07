@@ -110,7 +110,6 @@ func GetIntegral() Ranks {
 		db.Where("user_id = ?", user.ID).Find(&integrals)
 		var total uint8
 		for _, integral := range integrals {
-
 			if integral.IsIncrease {
 				total += integral.Quantity
 			} else {

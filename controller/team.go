@@ -58,6 +58,25 @@ func UpdateTeam(c *gin.Context) {
 	handle.ReturnSuccess("ok", team, c)
 }
 
+// DeleteTeam 批量删除分组
+func DeleteTeam(c *gin.Context) {
+	var r struct {
+		Teams []uint `json:"teams" binding:"required"`
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+
+	if err := db.Delete(&model.Team{}, r.Teams).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "删除失败", c)
+	}
+
+	handle.ReturnSuccess("ok", r, c)
+}
+
 // GetTeamRank 获取队伍积分排名
 func GetTeamRank(c *gin.Context) {
 	_ranks := GetIntegral()
