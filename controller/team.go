@@ -92,6 +92,36 @@ func GetTeamRank(c *gin.Context) {
 	handle.ReturnSuccess("ok", teamRanks, c)
 }
 
+// GetTeams 获取队伍
+func GetTeams(c *gin.Context) {
+	var r struct {
+		Name  string `json:"name"`  // 组名
+		Month uint8  `json:"month"` // 月份
+		Key   string `json:"key"`   // 标识
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+	db := config.GetMysql()
+	var teams []model.Team
+	if r.Name != "" {
+		db = db.Where("name LIKE ?", "%"+r.Name+"%")
+	}
+
+	if r.Month != 0 {
+		db = db.Where("month = ?", r.Month)
+	}
+
+	if r.Key != "" {
+		db = db.Where("key LIKE ?", "%"+r.Key+"%")
+	}
+
+	db.Order("created_at DESC").Find(&teams)
+	handle.ReturnSuccess("ok", teams, c)
+}
+
 type TeamRank struct {
 	ID       uint   `json:"id"`
 	Name     string `json:"name"`

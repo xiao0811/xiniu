@@ -193,6 +193,8 @@ func GetRouter() *gin.Engine {
 		team.POST("/update", controller.UpdateTeam)
 		// 获取组队积分
 		team.POST("/team_rank", controller.GetTeamRank)
+		// 获取队伍
+		team.POST("/get_teams", controller.GetTeams)
 	}
 	return app
 }
