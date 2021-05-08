@@ -95,6 +95,8 @@ func GetStationLetter(c *gin.Context) {
 		SenderID    uint   `json:"sender_id"`    // 发送者ID
 		RecipientID uint   `json:"recipient_id"` // 接收者ID
 		Title       string `json:"title"`        // 消息标题
+		StartTime   string `json:"start_time"`   // 开始时间
+		EndTime     string `json:"end_time"`     // 结束时间
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -119,6 +121,14 @@ func GetStationLetter(c *gin.Context) {
 
 	if r.Title != "" {
 		db = db.Where("title LIKE ?", "%"+r.Title+"%")
+	}
+
+	if r.StartTime != "" {
+		db = db.Where("created_at > ?", r.StartTime)
+	}
+
+	if r.EndTime != "" {
+		db = db.Where("created_at < ?", r.EndTime)
 	}
 
 	db.Find(&letters)
