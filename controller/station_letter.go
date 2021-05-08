@@ -45,3 +45,83 @@ func CreateStationLetter(c *gin.Context) {
 
 	handle.ReturnSuccess("ok", sl, c)
 }
+
+// UpdateStationLetter 更新
+func UpdateStationLetter(c *gin.Context) {
+	var letter model.StationLetter
+	if err := c.ShouldBind(&letter); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	db := config.GetMysql()
+	if err := db.Where("id = ?", letter.ID).First(&letter).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "该条站内信不存在", c)
+		return
+	}
+
+	if err := db.Save(&letter).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "更新失败", c)
+		return
+	}
+	handle.ReturnSuccess("ok", letter, c)
+}
+
+// DeleteStationLetter 删除
+func DeleteStationLetter(c *gin.Context) {
+	var letter model.StationLetter
+	if err := c.ShouldBind(&letter); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	db := config.GetMysql()
+	if err := db.Where("id = ?", letter.ID).First(&letter).Error; err == nil {
+		handle.ReturnError(http.StatusBadRequest, "该条站内信不存在", c)
+		return
+	}
+
+	if err := db.Delete(&letter).Error; err != nil {
+		handle.ReturnError(http.StatusBadRequest, "删除失败失败", c)
+		return
+	}
+	handle.ReturnSuccess("ok", letter, c)
+}
+
+// GetStationLetter 获取站内信
+func GetStationLetter(c *gin.Context) {
+	var r struct {
+		ContractID  uint   `json:"contract_id"`  // 关联合约ID
+		SenderID    uint   `json:"sender_id"`    // 发送者ID
+		RecipientID uint   `json:"recipient_id"` // 接收者ID
+		Title       string `json:"title"`        // 消息标题
+	}
+
+	if err := c.ShouldBind(&r); err != nil {
+		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
+		return
+	}
+
+	var letters []model.StationLetter
+	db := config.GetMysql()
+
+	if r.ContractID != 0 {
+		db = db.Where("contract_id = ?", r.ContractID)
+	}
+
+	if r.SenderID != 0 {
+		db = db.Where("sender_id = ?", r.SenderID)
+	}
+
+	if r.RecipientID != 0 {
+		db = db.Where("recipient_id = ?", r.RecipientID)
+	}
+
+	if r.Title != "" {
+		db = db.Where("title LIKE ?", "%"+r.Title+"%")
+	}
+
+	db.Find(&letters)
+
+	handle.ReturnSuccess("ok", letters, c)
+}

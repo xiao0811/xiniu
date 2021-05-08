@@ -182,6 +182,9 @@ func GetRouter() *gin.Engine {
 	stationLetter := token.Group("/station_letter")
 	{
 		stationLetter.POST("/create", controller.CreateStationLetter)
+		stationLetter.POST("/update", controller.UpdateStationLetter)
+		stationLetter.POST("/delete", controller.DeleteStationLetter)
+		stationLetter.POST("/get", controller.GetStationLetter)
 	}
 
 	// 组队
