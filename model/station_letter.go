@@ -2,7 +2,7 @@ package model
 
 type StationLetter struct {
 	ID          uint     `gorm:"primarykey" json:"id"`
-	ContractID  uint     `json:"contract_id"`                    // 关联合约ID
+	ContractID  uint     // 关联合约ID
 	Contract    Contract `json:"contract"`                       // 合约信息
 	SenderID    uint     `json:"sender_id"`                      // 发送者ID
 	Sender      User     `json:"sender"`                         // 发送者
