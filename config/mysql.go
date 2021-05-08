@@ -38,6 +38,7 @@ func init() {
 		&model.ForumLike{},
 		&model.IntegralLog{},
 		&model.Team{},
+		&model.StationLetter{},
 	)
 }
 
