@@ -34,6 +34,7 @@ func CreateStationLetter(c *gin.Context) {
 		Content:     r.Content,
 		MemberName:  r.MemberName,
 		Status:      1,
+		Reply:       r.Reply,
 	}
 	if r.Type == "create" {
 		sl.ContractID = r.ContractID
@@ -101,6 +102,7 @@ func GetStationLetter(c *gin.Context) {
 		Title       string `json:"title"`        // 消息标题
 		StartTime   string `json:"start_time"`   // 开始时间
 		EndTime     string `json:"end_time"`     // 结束时间
+		Reply       uint   `json:"reply"`
 	}
 
 	if err := c.ShouldBind(&r); err != nil {
@@ -137,6 +139,10 @@ func GetStationLetter(c *gin.Context) {
 
 	if r.MemberName != "" {
 		db = db.Where("member_name LIKE ?", "%"+r.MemberName+"%")
+	}
+
+	if r.Reply != 0 {
+		db = db.Where("reply = ?", r.Reply)
 	}
 
 	db.Find(&letters)
