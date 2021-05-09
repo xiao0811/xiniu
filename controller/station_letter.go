@@ -26,6 +26,7 @@ func CreateStationLetter(c *gin.Context) {
 		return
 	}
 	sl := model.StationLetter{
+		ContractID:  r.ContractID,
 		SenderID:    r.SenderID,
 		RecipientID: r.RecipientID,
 		Title:       r.Title,
