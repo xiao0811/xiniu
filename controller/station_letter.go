@@ -111,7 +111,7 @@ func GetStationLetter(c *gin.Context) {
 	}
 
 	var letters []model.StationLetter
-	db := config.GetMysql()
+	db := config.GetMysql().Preload("Sender").Preload("Recipient")
 
 	if r.ContractID != 0 {
 		db = db.Where("contract_id = ?", r.ContractID)

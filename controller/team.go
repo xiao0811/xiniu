@@ -123,7 +123,7 @@ func GetTeams(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "输入数据格式不正确", c)
 		return
 	}
-	db := config.GetMysql().Preload("Sender").Preload("Recipient")
+	db := config.GetMysql()
 	var teams []model.Team
 	if r.Name != "" {
 		db = db.Where("name LIKE ?", "%"+r.Name+"%")
