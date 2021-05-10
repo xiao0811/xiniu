@@ -7,6 +7,7 @@ import (
 	"github.com/xiao0811/xiniu/config"
 	"github.com/xiao0811/xiniu/handle"
 	"github.com/xiao0811/xiniu/model"
+	"gorm.io/gorm"
 )
 
 // CreateTitle 发布新内容
@@ -94,7 +95,27 @@ func DeleteTitle(c *gin.Context) {
 		return
 	}
 
-	if err := db.Delete(&ft).Error; err != nil {
+	err := db.Transaction(func(tx *gorm.DB) error {
+
+		// 删除点赞
+		if err := db.Where("title_id = ?", ft.ID).Delete(model.ForumLike{}).Error; err != nil {
+			return err
+		}
+
+		// 删除评论
+		if err := db.Where("title_id = ?", ft.ID).Delete(model.ForumComment{}).Error; err != nil {
+			return err
+		}
+
+		if err := db.Delete(&ft).Error; err != nil {
+			return err
+		}
+
+		// 返回 nil 提交事务
+		return nil
+	})
+
+	if err != nil {
 		handle.ReturnError(http.StatusBadRequest, "删除失败", c)
 		return
 	}
