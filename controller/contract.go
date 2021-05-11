@@ -177,7 +177,6 @@ func ContractList(c *gin.Context) {
 	db.Where("id = ?", token.UserID).First(&user)
 	var users []model.User
 	var names []string
-	// var userID []uint
 	_sql := db.Where("status = 1")
 	if user.Duty > 2 {
 		_sql.Where("duty = ?", user.Duty)
@@ -196,16 +195,17 @@ func ContractList(c *gin.Context) {
 		names = append(names, u.RealName)
 		// userID = append(userID, u.ID)
 	}
-	fmt.Println(names)
 	var contracts []model.Contract
 	var count int64
 	var pages int
 	sql := db.Preload("Member")
-	// if user.Duty == 2 { // 运营
-	// 	sql.Where("operations_staff IN ?", names)
-	// } else if user.Duty == 3 { // 业务
-	// 	sql.Where("business_people IN ?", names)
-	// }
+	if user.Duty == 2 { // 运营
+		if user.Role > 1 {
+			sql.Where("operations_staff IN ?", names)
+		}
+	} else if user.Duty == 3 { // 业务
+		sql.Where("business_people IN ?", names)
+	}
 	if r.UUID != "" {
 		sql = sql.Where("uuid = ?", r.UUID)
 	}
