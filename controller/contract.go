@@ -201,11 +201,11 @@ func ContractList(c *gin.Context) {
 	var count int64
 	var pages int
 	sql := db.Preload("Member")
-	if user.Duty == 2 { // 运营
-		sql.Where("operations_staff IN ?", names)
-	} else if user.Duty == 3 { // 业务
-		sql.Where("business_people IN ?", names)
-	}
+	// if user.Duty == 2 { // 运营
+	// 	sql.Where("operations_staff IN ?", names)
+	// } else if user.Duty == 3 { // 业务
+	// 	sql.Where("business_people IN ?", names)
+	// }
 	if r.UUID != "" {
 		sql = sql.Where("uuid = ?", r.UUID)
 	}
