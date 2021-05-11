@@ -179,7 +179,7 @@ func ContractList(c *gin.Context) {
 	var names []string
 	// var userID []uint
 	_sql := db.Where("status = 1")
-	if user.Duty > 1 {
+	if user.Duty > 2 {
 		_sql.Where("duty = ?", user.Duty)
 	}
 
