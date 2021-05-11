@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -149,21 +148,13 @@ func SendChangePasswordMessage(c *gin.Context) {
 // ChangePassword 修改密码
 func ChangePassword(c *gin.Context) {
 	var r struct {
-		Phone    string `json:"phone" binding:"required"`
-		Password string `json:"password" binding:"required"`
-		Code     string `json:"code" binding:"required"`
+		Phone       string `json:"phone" binding:"required"`
+		OldPassword string `json:"old_password"`
+		Password    string `json:"password" binding:"required"`
+		Compulsory  bool   `json:"compulsory"` // 忘记旧密码强制更新
 	}
 	if err := c.ShouldBind(&r); err != nil {
 		handle.ReturnError(http.StatusBadRequest, "请求数据不正确", c)
-		return
-	}
-	rc := config.GetRedis()
-	defer rc.Close()
-	code, _ := rc.Get("change_password_" + r.Phone).Result()
-
-	fmt.Println(code, r.Code)
-	if code != r.Code {
-		handle.ReturnError(http.StatusBadRequest, "验证码错误或过期", c)
 		return
 	}
 
@@ -173,6 +164,14 @@ func ChangePassword(c *gin.Context) {
 		handle.ReturnError(http.StatusBadRequest, "手机号码不正确", c)
 		return
 	}
+
+	if !r.Compulsory {
+		if !handle.CheckPasswordHash(r.OldPassword, user.Password) {
+			handle.ReturnError(http.StatusInternalServerError, "旧密码错误", c)
+			return
+		}
+	}
+
 	ps, _ := handle.HashPassword(r.Password)
 	user.Password = ps
 	if err := db.Save(&user).Error; err != nil {
