@@ -196,7 +196,7 @@ func ContractList(c *gin.Context) {
 		names = append(names, u.RealName)
 		// userID = append(userID, u.ID)
 	}
-
+	fmt.Println(names)
 	var contracts []model.Contract
 	var count int64
 	var pages int
