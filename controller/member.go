@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -249,6 +250,10 @@ func DeleteMember(c *gin.Context) {
 	})
 
 	if err != nil {
+		if strings.ContainsAny(err.Error(), "foreign") {
+			handle.ReturnError(http.StatusBadRequest, "该用户还有关联合约不能删除", c)
+			return
+		}
 		handle.ReturnError(http.StatusBadRequest, "客户删除失败", c)
 		return
 	}
